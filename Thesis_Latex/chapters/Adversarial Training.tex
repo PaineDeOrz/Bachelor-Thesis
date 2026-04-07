@@ -1,0 +1,193 @@
+\chapter{Adversarial Training}
+\label{chapter:adversarial_training}
+
+\section{Related Work}
+\label{section:related_work_adversarial_training}
+Generative adversarial networks (GANs) were introduced by Goodfellow et al. in 2014 \cite{GAN_Goodfellow} as a framework to train generative models.
+The core idea behind GANs is to pit two neural networks (a generator and a discriminator) against each other, where the generator tries to create realistic data samples, while the discriminator attempts to distinguish between real and generated samples.
+In this way, both networks improve each other's performance.
+Since their introduction, GANs have been widely adopted in various domains, including computer vision, healthcare, finance or natural language processing \cite{GAN_uses}.
+
+In the domain of chess-playing AI agents, there is very limited research on the application of GANs.
+The work that does exist primarily focused on using GANs to generate realistic chess positions \cite{GAN_positions} or to recognize a board position from an image \cite{GAN_image}.
+There are two pieces of research that we have been able to find that explored the use of GANs in training chess-playing agents.
+\cite{GAN_style} focused, similarly to some of the related work for behavior stylometry (Section \ref{section:related_work_behavior_stylometry}), on emulating the playing style of a specific human player, which, while not completely applicable in our case, did provide useful insights into the structure of the GAN and training procedure.
+\cite{GAN_anticheat} explored the use of GANs in detecting cheating.
+Thus, unlike in our work, the main focus of the paper was the discriminator, which was trained to distinguish between human and engine-generated moves, while the generator's role was to play moves as close to Stockfish as possible, while appearing human-like.
+The results presented in the paper indicate that adversarial training can lead to more human-like play, and the conditions under which the training is performed can significantly impact the quality of the generated moves.
+The discriminator, for example, had to be pre-trained, otherwise the generator failed to learn effectively.
+Also, the introduction of pure Stockfish-generated moves into the training data for the generator lead to improved performance, as it provided a stronger signal for the generator to learn from.
+
+The main insights relevant to our work were the theoretical framework for using GANs to train chess-playing agents, in particular the WGAN architecture (used in \cite{GAN_style}), and the need for changing the output of the generator from an argmax of the move probabilities to some sort of a softmax, which was necessary to allow the gradients to flow back from the discriminator to the generator.
+
+\section{Methodology}
+\label{section:methodology_adversarial_training}
+The main idea behind our approach was to use Maia2 as the generator and to train a discriminator to classify moves as either human or engine-generated.
+Inherently, this starting point implied an STGAN model (as introduced in \cite{GAN_style}), meaning that the generator loss was not structured purely in terms of the discriminator.
+Instead, the generator already had a task-specific loss (the cross-entropy loss for move prediction that Maia2 already optimizes for), to which we added an adversarial loss component that encourages the generator to produce moves that are classified as human by the discriminator.
+Combining this with the fact that we are dealing with probability distributions over moves, we chose to use the same WGAN architecture as in \cite{GAN_style}, which was designed to provide a more stable training process for GANs, and was particularly well-suited for cases where the generator's output is a probability distribution \cite{WGAN}.
+
+Maia2's architecture relies on a ResNet backbone, which processes the input chess position and produces a feature representation that is then passed to the Elo-aware attention mechanism, which produces the final move probabilities.
+The discriminator's architecture (Figure \ref{fig:discriminator_architecture}) used the same ResNet input processing (in order to keep a clear consistency between the two networks and their inputs), but then only took the move embedding and passed it through a cross-attention mechanism with the position features, followed by a final classification head that would output a linear critic score representing the probability of the move being human-generated.
+Because the discriminator is essentially a classifier (but with negative values for human moves and positive ones for engine-generated moves), it minimizes the Wasserstein distance between the distribution of human moves and the distribution of generated moves through the critic loss:
+\begin{equation}
+\begin{aligned}
+    \mathcal{L}_D = &- \mathbb{E}_{(board, human\_move) \sim P_{data}} [D(board, human\_move)]\\ 
+    &+ \mathbb{E}_{(board, G\_move) \sim P_g} [D(board, G\_move)]
+\end{aligned}
+\end{equation}
+where $P_{data}$ is the distribution of human moves and $P_g$ is the distribution of generated moves.
+\begin{figure}[H]
+    \hspace{-2cm}
+    \includegraphics[width=1.3\textwidth]{Discriminator_Architecture.pdf}
+    \caption{Architecture of the discriminator: same board processing as Maia2 flowing into a move embedding instead of skill embedding, followed by a cross-attention mechanism and a final classification head.}
+    \label{fig:discriminator_architecture}
+\end{figure}
+
+Maia2's original loss is the weighted sum of the cross-entropy loss for move prediction, the BCE loss on side information and the MSE loss for the win probability (value head).
+To this, we added the adversarial loss component, which encourages the generator to produce moves that are classified as human by the discriminator, thus creating the adversarial generator loss:
+\begin{equation}
+    \mathcal{L}_G = \mathcal{L}_{original} - \lambda \cdot \mathbb{E}_{(board, G\_move) \sim P_g} [D(board, G\_move)]
+\end{equation}
+where $\mathcal{L}_{original}$ is the original loss used to train Maia2, and $\lambda$ is a hyperparameter that controls the strength of the adversarial loss component.
+After experimentation with different $\lambda$ values, we reached the conclusion that $\lambda = 1$ was a good choice for our training process, with $\mathbb{E}_{(board, G\_move) \sim P_g} [D(board, G\_move)]$ not reaching absolute values higher than 3 during training.
+
+An interesting problem arose from the fact that the generator's output is a probability distribution over moves, while the discriminator only takes a single move as input.
+The obvious solution was to simply use the move with the highest probability as the generator's move, but the argmax function is not differentiable, which means that the gradients from the discriminator would not be able to flow back to the generator during training.
+To solve this problem, some sort of gradient estimator is needed.
+We used the Gumbel-Softmax trick \cite{Gumbel_Softmax}, which allowed us to sample from a categorical distribution in a differentiable way.
+
+The full training process is visualized in Figure \ref{fig:adversarial_training_process}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{single_model_losses.pdf}
+    \caption{Adversarial training process: stable, no mode collapse or overpowering discriminator. Generator converges slower than original Maia2 because the discriminator's signal only goes to 0 after more than 2 million games.}
+    \label{fig:adversarial_training_process}
+\end{figure}
+
+The interesting part to note is that the discriminator's penalty loss is increasing during the phase where the generator's loss is drastically decreasing, and then both losses stabilize.
+This means that the defining training phase is until about one million games, after which the generator has learned to produce moves that are classified as human by the discriminator, and the discriminator is no longer able to effectively distinguish between human and generated moves, thus leading to a stabilization of both losses.
+This is a good sign that the adversarial training is working as intended, without typical GAN problems such as mode collapse (where the generator produces a limited variety of outputs) or the discriminator overpowering the generator (where the discriminator becomes too good at distinguishing between real and generated samples, leading to vanishing gradients for the generator).
+So in terms of training stability and convergence, the adversarial training process seems to have been successful, with both the generator and discriminator improving together until they reach a point where neither can significantly outperform the other, which is the ideal outcome in GAN training.
+
+\section{Results}
+\label{section:results_adversarial_training}
+Just like in the case of behavior stylometry, we evaluated the performance of the adversarially trained model using accuracy as quantitative metric, and also by looking at some qualitative examples of the generated moves.
+Figure \ref{fig:top1_accuracy} shows the accuracy of the adversarially trained model compared to the original Maia2, taking into account the top predicted move.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Top1_accuracy.pdf}
+    \caption{Top-1 accuracy of the adversarially trained model compared to the original Maia2: similar accuracy at lower levels, but significantly worse performance at higher Elo.}
+    \label{fig:top1_accuracy}
+\end{figure}
+The results indicate that the accuracy is similar between the two models at lower Elo, but at higher levels, the adversarially trained model performs worse than the original Maia2, with the gap increasing as the Elo increases.
+Qualitative analysis quickly revealed the reason: the GAN model is very prone to producing blunders (moves that lead to a significant decrease in the position evaluation, such as losing material or getting checkmated).
+Blunders are very common at low levels, which is why the accuracy is similar between the two models at low Elos, but they become increasingly rare at higher Elos, which is why the GAN model's performance drops significantly at higher Elos.
+Figure \ref{fig:blunder} shows an example of a blunder produced by the GAN model.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Blunder-prone.pdf}
+    \caption{GAN predicts Qxc6, which is then capturable by the bishop.}
+    \label{fig:blunder}
+\end{figure}
+While it is difficult to argue that Qxc6 is not a human-like move, it is also true that it is a very bad move, which is not something we would expect from a human player at a high Elo.
+The problem is that this was not an isolated case, but rather a common occurrence in the GAN model's predictions.
+As far as we could tell, it represents the only notable difference between the two models, which are otherwise very similar in the moves they produce.
+This is seen in the accuracy metrics as well, where the top-1 accuracies differ much more than the top-3 (Figure \ref{fig:top3_accuracy}), which means that even when the GAN model produces a blunder as its top move, it often has the correct move in its top-3 predictions, which indicates that the model is still learning to produce human-like moves, but it is not effectively learning to avoid blunders.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Top3_accuracy.pdf}
+    \caption{Top-3 accuracy of the adversarially trained model compared to the original Maia2: closer to each other than the top-1 accuracy.}
+    \label{fig:top3_accuracy}
+\end{figure}
+
+The most natural explanation for this phenomenon is that the discriminator learned to classify objectively good moves as engine-generated and blunders as human, then rewarding the generator for predicting blunders.
+Interestingly however, when inputting Qxc6 into the discriminator, it outputs with probability 0.986 that the move is engine-generated, which is the contrary to the hypothesis that the discriminator is rewarding blunders.
+The true explanation could only be seen by retracing the training process.
+When inputting Qxc6 into the discriminator produced after just 5000 games of training, it outputs with probability 0.984 that the move is human.
+So while the discriminator did learn throughout the training process to distinguish much better between human and engine-generated moves, it was too late for the generator, which had already learned to produce blunders that are classified as human by the discriminator in the early stages of training, and was not able to unlearn this behavior later on, when the discriminator became more accurate.
+This is a common problem in GAN training, and there are various techniques used to mitigate it.
+The most common one is to pre-train the discriminator before starting the adversarial training, which we have tried and will be discussed in the next section.
+Another frequently employed technique is to use a more complex architecture for the discriminator, but the fact that the discriminator after training classifies blunders correctly as engine-generated, and the fact that the training process seems to be stable and converging, indicates that the architecture is not the main problem in our case.
+
+There are also examples when the GAN model produces better results than the original Maia2, particularly because of the discriminator's influence.
+A very descriptive instance is in the position we first used to illustrate the difference between a human and a computer move, shown again in Figure \ref{fig:human_vs_engine2}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Human_move2.pdf}
+    \caption{Same as Figure \ref{fig:human_vs_engine}. Stockfish suggests b5. New model also suggest Kg8, defending the f7 pawn, which is a more human-like move than Nf8 suggested by the original Maia2.}
+    \label{fig:human_vs_engine2}
+\end{figure}
+First and foremost, the discriminator classifies b5 as an engine-generated move with a probability of 0.999 which is what we want and expect.
+Both the original Maia2 and the GAN model predict e5 and Rg8 as their top two moves, but the interesting part is the third recommendation.
+Maia2 gives Nf8 with 0.17 probability, while the GAN model suggest Kg8, having the highest critic score (discriminator output) among the three moves.
+Kg8 is certainly a more human-like move than Nf8, protecting the f7 pawn.
+
+\subsection*{Pre-training the discriminator}
+\label{section:pretraining_discriminator}
+As previously mentioned, the most common solution to the problem of the generator learning to produce blunders in the early stages of training is to pre-train the discriminator, so that it can provide a stronger signal for the generator to learn from, and thus avoid learning to produce blunders.
+We tried this approach, using a small dataset of the first 5000 games played in the month of July 2020 (none of which were used in the training process of the GAN model).
+To generate the engine moves for the discriminator's training, we used a weaker version of Stockfish, tuned to play around the level of the corresponding player in each position.
+These versions of Stockfish are available in the Python chess library \cite{python_stockfish}, and they are designed to play at a specific Elo level by limiting the depth of the search and the amount of time spent on each move.
+While the moves generated by these Stockfish versions are far from perfect (many times they are artificial blunders or too strong for the corresponding Elo level), they still provide clear patterns for the discriminator to learn from.
+Considering that the purpose of this pre-training was neither to achieve a very high accuracy for the discriminator, nor to create an anticheating model, accuracy was not the main metric we were looking at, but rather the loss and the critic scores for the human and engine-generated moves.
+
+We trained the discriminator for 50 epochs, and the most interesting aspect of the pre-training was the great impact that preprocessing the dataset had on the training process.
+When using the raw dataset (including opening moves, blunders, moves played with little time left on the clock etc.), the discriminator was highly unstable and unbalanced.
+Critic scores for engine-generated moves were very high, and the accuracy was skewed strongly towards classifying moves as engine-generated.
+This was exactly the behavior that shaped the generator's learning process in the early stages of training, leading to the blunder-prone behavior that we observed in the final model.
+Cleaning the dataset by not taking opening moves (chosen as the first 10 ply) into consideration, removing blunders (defined as moves that change the Stockfish position evaluation by more than 2 centipawns) and removing moves played with less than 10 seconds left on the clock, led to a much more stable and balanced training process for the discriminator.
+Interestingly, this is not instantly noticeable in the loss, represented in Figure \ref{fig:discriminator_loss} as the Wasserstein distance between the distribution of human moves and the distribution of generated moves, which is only slightly smaller for the cleaned dataset.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Discriminator_loss.pdf}
+    \caption{Wasserstein distance (inverse of discriminator loss) with and without cleaning the dataset. The difference is not significant, but the cleaned dataset does lead to a slightly smaller distance, which indicated better performance of the discriminator.}
+    \label{fig:discriminator_loss}
+\end{figure}
+
+Instead, a significant difference can be observed in the accuracy of the discriminator, which is not just higher overall for the cleaned dataset (Figure \ref{fig:discriminator_total_accuracy}), but also better balanced between the two classes (Figure \ref{fig:discriminator_class_accuracy}), which is what we were looking for in order to provide a stronger signal for the generator to learn from, and thus avoid learning to produce blunders in the early stages of training.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Discriminator_total_accuracy.pdf}
+    \caption{Total accuracy of the discriminator with and without cleaning the dataset: higher accuracy for the cleaned dataset across all levels.}
+    \label{fig:discriminator_total_accuracy}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Discriminator_class_accuracy.pdf}
+    \caption{Class accuracy of the discriminator with and without cleaning the dataset: much more balanced predictions for the cleaned dataset.}
+    \label{fig:discriminator_class_accuracy}
+\end{figure}
+
+The stability can also be observed in the critic scores the discriminator outputs.
+Taking as example the blunder originally recommended by the GAN model (Qxc6 in the position shown in Figure \ref{fig:blunder}), the discriminator trained on the raw dataset outputs a critic score of almost 14, whereas the cleaned dataset leads to a much more reasonable score of 3.1.
+So while both models classify the move as clearly human (which is what we want, as the move is indeed human-like), the model trained on the raw dataset is rewarding the generator much more for producing this blunder, which is what leads to the blunder-prone behavior of the GAN model.
+
+The training process (Figure \ref{fig:training_process_cleaned}), as expected, was not much different from the one without pre-training.
+The main difference is that at the very beginning of the training process, the discriminator already had a better understanding of the difference between human and engine-generated moves, which provided a stronger signal for the generator to learn from.
+Thus the discriminator's signal was strongest at the start and then quickly converged towards 0 as the generator learns to produce human-like moves.
+This also meant that the generator's learning was slightly accelerated at the very beginning, though the overall training process was very similar to the one without pre-training.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{GAN_clean_training.pdf}
+    \caption{Adversarial training process with pre-training the discriminator on the cleaned dataset: Discriminator's signal is stronger at the start, leading to a slightly faster convergence of the generator.}
+    \label{fig:training_process_cleaned}
+\end{figure}
+
+The results are also quite similar to the ones without pre-training.
+Still, the only main difference to the original Maia2, from a qualitative standpoint, is the slightly blunder-prone behavior, which is still present in the GAN model with pre-training, though to a much lesser extent.
+This is also reflected in the accuracy metrics, where the top-1 accuracy is still lower than the original Maia2 at higher Elos, but the gap is smaller than in the case without pre-training (Figure \ref{fig:top1_accuracy_cleaned}).
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{GAN_clean_accuracy.pdf}
+    \caption{Top-1 accuracy of the adversarially trained model with pre-training the discriminator on the cleaned dataset, compared to the original Maia2. The accuracy is still lower at higher Elos, but the gap is smaller than in the case without pre-training. At Elo<1100 (>50\% of players), it even outperforms the original Maia2.}
+    \label{fig:top1_accuracy_cleaned}
+\end{figure}
+
+Overall, while pre-training the discriminator on a cleaned dataset is a step in the right direction, it does not completely solve the problem of the generator learning to produce blunders in the early stages of training, which indicates that there are other factors at play as well.
+Intuitively, it is easy to explain this behavior from the construction of the discriminator.
+Distinguishing between human and engine-generated moves is a very complex task, with a great deal of research still needed to be able to truly automate anti-cheating types of models.
+Even the most modern anti-cheating mechanisms still rely nowadays on human experts' analysis, and automated models need much more data than just one move (hundreds of games played by the same player, time management etc.) to be able to achieve a good accuracy (see for example \cite{chess_anticheat}, where multiple models and neural networks are combined).
+Thus, it is not surprising that the discriminator is not able to provide a strong signal for the generator to learn from, especially since Maia2 is very strong even with little training data.
+While the adversarial training method has many possible applications (such as style-transfer) and advantages (better explainability, flexibility etc.), we believe it is more of a fine-tuning method to slightly modify the behavior of an already well-trained model, rather than a method that can lead to significant improvements over the original model, especially if the original model is already very strong.
+Just like with behavior stylometry, we advocate for psychologically-informed metrics and methods, which could lead to much more refined discriminators and thus better results for the generator, rather than just relying on pure machine learning techniques.

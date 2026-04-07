@@ -1,0 +1,90 @@
+\chapter{Foundations}
+\label{chapter:foundations}
+
+\section{Human vs. Engine Move}
+To begin understanding the reason behind the development of human-aligned chess engines, the most important aspect to consider is the difference between human and engine moves.
+For people who are not deeply familiar with chess, this difference may not be immediately obvious, as humans and engines often choose the same moves in a given position.
+Behind any human move lies a complex thought process, involving general intuition, pattern recognition, and strategic planning.
+Humans rely on previous experience, learned principles, and rather abstract concepts to guide their decision-making.
+Even outer factors, such as time pressure, opponent rating, must-win situation or not, can influence the choice of move, but we will not consider these in this work.
+
+Focusing on the game alone, the best example to illustrate human abstract thinking is an endgame position.
+When one learns endgame principles, they do not memorize specific moves, but rather general positions which are known to be winning or drawing, or abstract ideas and concepts.
+One such concept is ``king opposition'' and it refers to placing the king on the same rank or file in order to force the opponent to choose one direction to move their own king, and then go around it the other way, infiltrating.
+Figure \ref{fig:king_opposition} shows a concrete example, where it is black to move.
+The position comes from a blitz game played between two international masters (the second highest title in chess), so a very high-level game.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.4\textwidth]{king_opposition.png}
+  \caption{Ke6 achieves ``king opposition'' and white's king cannot advance. Stockfish recommends h5, allowing Kd5}
+  \label{fig:king_opposition}
+\end{figure}
+The move Ke6 is by far the most natural move, because it gets the king opposition, meaning it stops the white king from advancing anywhere, especially on the d5 square.
+This is the move that was played in the game as well.
+However, Stockfish says that it is a losing move, instead suggesting h5 as the only way to draw, which is rather unnatural, because any player is taught that in this kind of endgames, the most important thing is to not allow the enemy king forward.
+
+To give a different example, consider the position in Figure \ref{fig:human_vs_engine}, with black to move.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{Human_move.png}
+    \caption{Human vs. Engine Move: White attacks the f7 pawn, but Stockfish recommends b5}
+    \label{fig:human_vs_engine}
+\end{figure}
+One can see that white has a powerful attack, not only threatening to win the pawn on f7, but also preparing checkmating ideas by pushing the g pawn or bringing the c3 knight to d5.
+Stockfish, instead of defending the pawn, recommends a counterattack on the other side of the board with b5, a move that not only gives up material and allows the white queen to get closer to the black king, but also does not create a threat in return.
+Maia, a human-aligned engine, chooses a much more ``natural'', human-like move, which is e5, creating the threat of a fork in the middle of the board, while also opening the diagonal for the black queen.
+The reason why Stockfish's move is objectively better (in that it leads to a draw instead of a loss) can only be seen 20 moves later, when the attack fizzles out and that advanced pawn becomes an asset in the endgame.
+Such depth of calculation and ignoring of immediate threats is simply not human though, and it is hard for a beginner or intermediate player to learn from such moves.
+This is the main motivation behind human-aligned engines: to create chess engines that play in a more human-like manner, making moves that are understandable and instructive for human players.
+
+\section{Modern Chess Engines}
+In order to understand the challenges and methods involved in creating human-aligned chess engines, it is important to first look at how regular modern engines work.
+We refer to these engines as ``modern'' because their development was not defined by hardware limitations, and they do not rely on brute-force techniques and massive amounts of computation to achieve their strength.
+Instead, the algorithms that they employ are what make them strong, and they are able to run on consumer-grade hardware.
+
+As will be seen later (Section \ref{section:existing_engines}), human-aligned engines build upon the same foundations as these rather than introducing entirely new concepts, so a solid understanding of their inner workings is essential.
+All modern engines share a common architecture, consisting of two components: a neural network that, given a board position, outputs a so-called evaluation function, and a search algorithm that uses this evaluation function to explore the game tree and select the best move.
+This architecture was first introduced in 2017 by DeepMind's AlphaZero \cite{alphazero} and has since become the standard for chess engines. 
+The neural network is trained on large amounts (tens and even hundreds of millions) of self-generated games, that is, games played between instances of the engine itself, and is responsible for generating general patterns and understanding of the game.
+The search algorithm, on the other hand, is responsible for exploring specific variations and calculating concrete move sequences, impacting the performance and strength of the engine.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{AlphaZero.pdf}
+  \caption{AlphaZero Architecture \cite{alphazero_cheat_sheet}: the NN takes the board position as input and outputs a move probability distribution and a value estimation, which are then used by the MCTS search algorithm to explore the game tree and select the best move.}
+  \label{fig:AlphaZero}
+\end{figure}
+
+This, however, is where the similarities end.
+When it comes to the neural network, Stockfish uses a very shallow network with only a few layers \cite{stockfish}, while Leela Chess Zero employs a deep convolutional neural network with many layers and millions of parameters \cite{leela}.
+In general, the CNN-based engines are considered to be more human-like in their playstyle, generating more clear general patterns that are easier for humans to understand and apply in their own games.
+The search algorithms also differ significantly, with Stockfish relying on a highly optimized alpha-beta pruning algorithm, while Leela Chess Zero uses a Monte Carlo Tree Search (MCTS) approach.
+This is the main reason why Stockfish is the strongest and most popular engine: its alpha-beta search, based on decades of research and optimization, is simply more efficient and effective than MCTS in the context of chess.
+However, MCTS has the advantage of being more flexible and adaptable, allowing for more human-like decision-making and exploration of the game tree.
+That is why research in human-aligned engines has focused on Leela Chess Zero as a base model, as it is more amenable to modifications that can lead to more human-like behavior.
+
+\section{Existing Human-Aligned Engines}
+\label{section:existing_engines}
+As far as we have been able to determine, there are four human-aligned chess engines that have been well documented in literature: Maia \cite{maia} and its successor Maia2 \cite{maia2} (which we will be using in this thesis), Allie \cite{allie} and Harmonia \cite{harmonia}.
+Maia was the first engine of this type, developed in 2020, and it came as a simple modification of Leela Chess Zero.
+The idea was extremely straightforward: instead of letting the neural network train on self-play games, train it on human games.
+Since there are huge databases with billions of human games available (a very large number being of course necessary for training neural networks), this wouldn't be a problem.
+The more fascinating aspect was the search algorithm: the authors found that better results were obtained by just removing it entirely, and letting the neural network select moves directly.
+The cause of this, as the authors of Allie later discovered, is that Maia only aimed at emulating amateur-level players, not professionals.
+At the high levels, where players align very closely with Stockfish evaluations, the search algorithm is necessary to capture the small differences in move quality.
+Thus Allie was developed, keeping almost the same neural network as Maia, but introducing a time-adaptive MCTS search algorithm that takes into account how long human players at different levels take to make moves. 
+Harmonia, on the other hand, changed the neural network architecture itself, using an encoder-only transformer that proved to be much more efficient in size and training time.
+
+We did not focus on Allie or Harmonia in this thesis, the reason being that their codebases are not publicly available, and we would not be able to guarantee a faithful reproduction.
+Instead, this work relied on Maia2, developed by the same team as Maia, improving upon it by taking players' rating into account in a different way.
+Instead of only using games played by humans of a certain rating range and thus training many separate models, Maia2 introduced rating as an additional input to the neural network, allowing a single model to adapt its playstyle to different levels.
+Thus a single engine model is created, which plays differently not just based on its rating (the player level it is emulating), but also based on the opponent's rating, leading to a much more dynamic and human-like behavior.
+This is because a human plays differently depending on the opponent: against a weaker opponent, they may play more aggressively and take more risks in order to force wins, while against a stronger opponent, they may play more cautiously and defensively.
+\begin{figure}[H]
+  \hspace{-2cm}
+  \includegraphics[width=1.3\textwidth]{Maia2_Architecture.pdf}
+  \caption{Maia2 Architecture: convolutional layers process the board position, which is then combined with the rating input and passed through fully connected attention layers to produce the move probability distribution and value estimation}
+  \label{fig:Maia2}
+\end{figure}
+
+The results obtained by Maia2 are impressive, with the engine being able to closely mimic human playstyles at different levels, and even outperforming Maia and Allie in terms of move prediction accuracy.
+The codebase is publicly available\footnote{\url{https://github.com/CSSLab/maia2}} and represented the base for the methods proposed in this thesis.

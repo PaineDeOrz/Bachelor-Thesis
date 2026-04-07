@@ -1,0 +1,21 @@
+\chapter{Conclusion}
+\label{chapter:conclusion}
+
+This thesis aimed to explore the potential, challenges and limitations of behavior stylometry and adversarial training for improving state-of-the-art human-aligned chess engines.
+
+Behavior stylometry showed promising results in creating more nuanced engines by filtering the training data to only include games played in a certain style.
+While our approach only used two categories (tactical and positional), we advocate for a more fine-grained categorization of chess styles in future research, as well as the use of more psychologically-grounded evaluation metrics to better capture the nuances of human play.
+Generally, the results indicate that while behavior stylometry does not lead to a significant improvement in pure accuracy, it does modify the model's predictions in a way that is consistent with the intended style.
+Benefits of this method include its relatively simple implementation, its stability during training and the fact that it does not require any modification to the training process, as all the work is done in the data preprocessing stage.
+Potential applications could include the creation of more personalized chess engines, allowing players to better learn from, or training against, a specific style of play.
+
+Adversarial training's main challenge is the wide range of possibilities regarding the implementation (total model design, discriminator architecture, hyperparameters etc.), which makes it difficult to fully generalize the results and draw conclusions about the method as a whole.
+In our case, the WGAN setup proved to lead to a stable training process, creating a discriminator that can distinguish between human and engine-generated moves with a relatively high accuracy, but a generator that does not significantly change compared to the original Maia2 model, except for the more blunder-prone behavior.
+We identified the cause of this behavior to be the fact that the discriminator is not able to capture subtle aspects of human play (such as strategic planning, long-term thinking or immediate tactical awareness), and thus focuses on more superficial features, such as blunders, which are more common in human play.
+More research is needed to find ways to make the discriminator capture these more subtle aspects, for example by incorporating cognitive insights into its design, or by focusing on emulating the human thought process rather than just the final move choice.
+The clear advantage of adversarial training is its explainability, as the discriminator's output adds a layer of interpretability to the model's predictions, and even becomes a tool by itself, as it can be used to evaluate the human-likeness of any move.
+Additionally, the flexibility of the method allows for tuning the model to achieve different goals than what we tried, for example combining the adversarial training with behavior stylometry and skewing the generator towards a specific playing style, or making the discriminator focus on specific aspects of human play, such as tactical patterns or endgame play, thus creating a more specialized engine.
+
+Overall, while both methods have their own advantages and limitations, we believe that they are both promising directions for future research in the field of human-aligned engines.
+However, by far the greatest leap forward in the field would consist in psychological studies of human chess play.
+Pure machine learning techniques are unlikely to lead to massive improvements over the current state-of-the-art models, and since the main goal of human-aligned engines is not pure accuracy, but rather personalization, explainability and flexibility, we advocate for psychologically-informed evaluation metrics and training methods as the most promising direction for future research in the field.

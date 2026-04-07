@@ -1,0 +1,35 @@
+\chapter{Introduction}
+\label{chapter:introduction}
+Chess has been at the forefront of artificial intelligence research for decades, serving not only as a means of presenting the capabilities of AI agents to the wide public, but also as a challenging domain for developing and testing new algorithms.
+Even before artificial intelligence as a field was formally established, early computer scientists were fascinated by the idea of creating machines that could play chess.
+From Alan Turing's Turochamp in the 1940s to IBM's Deep Blue in the 1990s, the last century saw tremendous advancements in chess-playing computers, though these were more of a demonstration of brute-force computational power rather than true intelligence \cite{chess_computer_history}.
+DeepBlue was the culmination of this era, defeating world champion at the time Garry Kasparov in 1997 by employing 32 processors to evaluate 200 million positions per second \cite{deepblue}.
+Ever since this legendary match, it has been clear that computers can surpass human performance in chess.
+However, the development of chess engines has not stopped there, with modern engines like Stockfish \cite{stockfish} and Leela Chess Zero \cite{leela} now far exceeding the strongest human players, without even needing massive computational resources.
+
+While these engines are incredibly strong and have changed the way chess is played and studied, they have also introduced a new challenge: their playstyle is often very different from that of human players, making it difficult for humans to learn from and interact with them.
+Of course, professional players have adapted to this new reality, but for amateur players, playing against such engines yields little educational value, and even interpreting their analysis and recommendations can be challenging due to the great depth and complexity of their calculations.
+Considering that the great majority of players today are either amateurs or total beginners (see Figure \ref{fig:chess_player_distribution}), it is clear that the demand for educational content and training tools is high.
+Traditional learning material in the form of opening books or endgame studies, however, is losing relevance in a world more and more reliant on artificial intelligence.
+As such, there is a need for engines that not only play at a high level but also present their thought process in a way that is understandable and useful for human learning.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{chess_com_stats.pdf}
+    \caption{Distribution of chess.com users by rating as of March 2026 \cite{chess_com_stats}. Advanced players are considered to have a rating above 1800 (under 10\% of all players)}
+    \label{fig:chess_player_distribution}
+\end{figure}
+
+Another big current problem in the world of chess is represented by the rise of cheating, especially in online chess.
+With the increasing strength and accessibility of chess engines, it has become easier for players to use them to gain an unfair advantage, particularly in online games where there is no physical presence to monitor the players.
+Anti-cheating measures have been implemented by online platforms, but they rely heavily on statistical analysis such as winrate, average accuracy compared to engine recommendations, and manual review of suspicious games \cite{chess_com_anticheat}.
+An engine that could mimic human play at the level of an amateur player would be a powerful tool for anti-cheating measures, as it could be used to generate synthetic data for training anti-cheating algorithms, or even to directly evaluate the human-likeness of a player's moves in real-time.
+
+To address these challenges, the field of ``human-aligned'' chess engines has emerged, focusing on creating systems that emulate human play.
+The field is still in its incipient phase, and this thesis aims to contribute to it by investigating different methods of improving such engines, namely behavior stylometry and adversarial training.
+While these methods have been widely studied in other domains, and even applied to chess engines in some cases, to the best of our knowledge they have not been used in human-aligned engines before in the way we propose here.
+This thesis thus explores these methods in depth, evaluates their effectiveness, and provides insights into their potential for creating more human-like chess engines.
+
+In order to explain the context of this work, we begin with an analysis of existing chess engines in Chapter \ref{chapter:foundations}.
+Then we present the related work, methodology and evaluation of the two methods in Chapters \ref{chapter:behavior_stylometry} and \ref{chapter:adversarial_training} respectively.
+To conclude, final discussions and ideas for future work are included in Chapter \ref{chapter:conclusion}.

@@ -1,0 +1,272 @@
+\chapter{Behavior Stylometry}
+\label{chapter:behavior_stylometry}
+
+\section{Related Work}
+\label{section:related_work_behavior_stylometry}
+Behavior stylometry is the study of identifying individual characteristics based on patterns of behavior.
+Historically, it has been applied in various fields, from psychology to cybersecurity.
+In the domain of machine learning, behavior stylometry has been widely employed for many different applications, such as personalized author identification and profiling \cite{author_identification}, user authentication \cite{user_authentication}, or fraud detection \cite{fraud_detection}.
+Of course, these are just a few examples, and it is easy to see how there are countless other applications where it can be useful.
+In the most general sense, behavior stylometry involves the collection and analysis of specific data that reflects an individual's behavior.
+This is why it is often used in conjunction with machine learning techniques, as they can effectively process and analyze large datasets to identify patterns and make predictions.
+While traditional stylometry initially focused on text (linguistic features), because textual data is the most readily available and easily processed, the field has since expanded to image recognition \cite{image_recognition} or speech recognition \cite{speech_recognition}.
+
+For chess, there have been two main directions of research.
+The first direction focuses on identifying players based on a number of games that they have played \cite{chess_stylometry1}.
+This is done by straightforward neural networks of various architectures that take as input a sequence of moves and output the predicted player, after being trained on a large dataset of games.
+Manual feature extraction is usually minimal, the network learning the relevant features by itself, relying on the sheer amount of data.
+For this reason, these methods were not particularly useful for our purposes, since we wanted more explainability and interpretability of the results, as well as being able to work with a limited number of games.
+The second direction of research focuses on creating engines that mimic the playing style of a specific player \cite{chess_stylometry2}.
+These engines work with much smaller datasets (only games of the player to be mimicked) and rely more on manual feature extraction, which made them more relevant to this work.
+
+\section{Methodology}
+\label{section:methodology_behavior_stylometry}
+In this thesis, we focused on the second direction, aiming to apply behavior stylometry techniques to improve human-aligned chess engines.
+Starting from the Maia2 engine \cite{maia2}, we trained models on different datasets representing different styles of play, namely aggressive, defensive, and mixed.
+The work was based mainly on \cite{chess_stylometry2}, but with some modifications to better suit our needs.
+The author of \cite{chess_stylometry2} defined a set of 8 features that were used to split players into 5 categories (each similar to the style of one famous grandmaster).
+Instead, we defined only 3 categories: aggressive, defensive, and mixed (playstyle that does not clearly fit in either of the other two), because we wanted to have a more general classification that can be applied to a wider range of players.
+In this way, the resulting models would not be tied to a specific player's style, but rather to a more general style, combining behavior stylometry with the advantage of training on large datasets.
+As such, ``aggressive'' refers to very tactical games, with dynamic openings, tactical middlegames, attacks on the king, piece sacrifices, and checkmating patterns.
+``Defensive'' refers to more positional games, with either many trades and long endgames, or closed positions with very few trades, where strategic maneuvering is more important than direct attacks.
+Of course, it is impossible to perfectly distinguish between these styles, and many games have elements of both, which is why the ``mixed'' category was necessary.
+
+To better understand the categories, let's take two examples.
+The first game\footnote{\url{https://lichess.org/d3UVZ3Th\#51}} started with a gambit line and a very dynamic position (Figure \ref{fig:game1_opening}), with multiple pins and tactics available to both sides.
+In the middlegame, white blundered, missing that black's capture on f3 comes with a check and thus their pin on the e8 rook does not actually work (Figure \ref{fig:game1_middle}).
+The game then ended with white thinking that Qe8 would be checkmate, but black can block with the bishop, and so white is left with no attack and material loss, resigning (Figure \ref{fig:game1_end}).
+Overall, an aggressive opening, many tactics, blunders and checkmating attacks, this game should definitely be categorized as ``aggressive''.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.31\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{game1_opening.pdf}
+    \caption{After 7 moves:\\Equal position}
+    \label{fig:game1_opening}
+\end{minipage}
+\begin{minipage}{0.31\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{game1_middle.pdf}
+    \caption{After 10 moves:\\Black is better}
+    \label{fig:game1_middle}
+\end{minipage}
+\begin{minipage}{0.31\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{game1_end.pdf}
+    \caption{After 16 moves:\\Black is winning}
+    \label{fig:game1_end}
+\end{minipage}
+\end{figure}
+
+The second game\footnote{\url{https://lichess.org/d3UVZ3Th\#7}} had an extremely passive opening from both players (Figure \ref{fig:game2_opening}), then turned into a very closed position, with all pawns on the board and white trying to take space (Figure \ref{fig:game2_middle}).
+The game ends with a simple one-move blunder by white (Figure \ref{fig:game2_end}) and an unexpected loss for black due to running out of time (which however is not relevant to our analysis).
+All in all, a positional game, with very few trades and more piece maneuvering, which should definitely be part of the second category.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{game2_opening.pdf}
+    \caption{After 4 moves:\\Equal position}
+    \label{fig:game2_opening}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{game2_middle.pdf}
+    \caption{After 17 moves:\\Black is better}
+    \label{fig:game2_middle}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{game2_end.pdf}
+    \caption{After 20 moves:\\Black is winning}
+    \label{fig:game2_end}
+\end{minipage}
+\end{figure}
+
+To quantitatively define the categories, we used a set of 10 features, which can be efficiently extracted from the way the dataset is stored.
+We used the monthly database of games from Lichess.org\footnote{\url{https://database.lichess.org/}}, more specifically the games between January and June 2020.
+These games were part of the training data for the Maia and Maia2 engines, and the authors also provide the games from 2020 as .csv files\footnote{\url{http://csslab.cs.toronto.edu/datasets/\#maia_kdd}}.
+The header of these files is shown in Table \ref{tab:lichess_csv_header}, and the information we used to calculate the features is highlighted in bold.
+
+\begin{table}[H]
+\hspace*{-1cm}
+\begin{threeparttable}
+\caption{CSV Header Fields for Chess Game Dataset}
+\label{tab:lichess_csv_header}
+\begin{tabular}{|l|l|l|l|l|}
+\toprule
+game\_id & type & result & white\_player & black\_player \\ \hline
+white\_elo & black\_elo & time\_control & \textbf{num\_ply} & termination \\ \hline
+white\_won & black\_won & no\_winner & move\_ply & move \\ \hline
+cp & \textbf{cp\_rel}\* & cp\_loss & \textbf{is\_blunder\_cp} & winrate \\ \hline
+winrate\_elo & winrate\_loss & is\_blunder\_wr & opp\_winrate & white\_active \\ \hline
+active\_elo & opponent\_elo & active\_won & \textbf{is\_capture} & clock \\ \hline
+opp\_clock & clock\_percent & opp\_clock\_percent & \textbf{low\_time}\*\* & board \\ \hline
+\textbf{active\_bishop\_count} & \textbf{active\_knight\_count} & \textbf{active\_pawn\_count} & \textbf{active\_queen\_count} & active\_rook\_count \\ \hline
+\textbf{is\_check} & \textbf{num\_legal\_moves} & opp\_bishop\_count & opp\_knight\_count & opp\_pawn\_count \\ \hline
+opp\_queen\_count & opp\_rook\_count &  &  &  \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \* ``cp\_rel'' means the Stockfish engine evaluation relative to the side to move, measured in centipawn
+\item \*\* While Maia2 does not use moves played in low time, we did, because in low time people play the most natural moves
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+So as not to have to parse the PGN of each game to extract features, which would have been very time-consuming, we only used features that can be extracted directly from the .csv files (Table \ref{tab:feature_table}).
+Behind each feature there is a clear intuition as to how it should impact the categorization of the game, which is written in the third column.
+For example, a longer game (with more moves) is much more susceptible to being more positional, which is why a higher num\_ply should steer the game more towards the ``positional'' category.
+The objective was to calculate for each game an aggression score as the weighted sum of these features.
+
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{Features from CSV and their Intuitive Meaning}
+\label{tab:feature_table}
+\begin{tabular}{lll}
+\toprule
+\textbf{Feature} & \textbf{Definition} & \textbf{Higher = ?} \\
+\midrule
+captures\_per\_move & $\frac{\texttt{captures}}{\texttt{num\_moves}}$ & tactical\\
+checks\_per\_move & $\frac{\texttt{checks}}{\texttt{num\_moves}}$ & tactical\\
+vol\_cp & Std.\ dev.\ of \texttt{cp\_rel} & tactical\\
+blunder\_rate\_cp & $\frac{\texttt{blunders\_cp}}{\texttt{num\_moves}}$ & tactical\\
+low\_time\_frac & $\frac{\texttt{low\_time\_moves}}{\max(\texttt{num\_moves},1)}$ & tactical\\
+avg\_legal\_moves & Mean of \texttt{num\_legal\_moves} & positional\\
+num\_ply & \texttt{num\_ply} & positional\\
+queen\_activity & Mean of \texttt{active\_queen\_count} & tactical \\
+minor\_piece\_loss & sum of $|\Delta(\texttt{active\_bishop\_count} + \texttt{active\_knight\_count})|$ & tactical\\
+pawn\_structure\_vol & Std.\ dev.\ of \texttt{active\_pawn\_count} & tactical\\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item ``captures'', ``checks'', etc.\ resemble the number of lines where ``is\_capture'', ``is\_check'', etc.\ is True
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+We applied K-Means clustering on the whole dataset, recording the weights of each feature both for the centroids and for the inter-cluster boundaries (Table \ref{tab:weights_table}).
+If all weights correspond to their intuitive meaning, the features that have ``tactical'' in the third column in Table \ref{tab:feature_table} should be positive, and the others negative.
+There were two features for which this was not the case, namely ``queen\_activity'' and ``minor\_piece\_loss''.
+The most likely explanation is queen endgames, which are extremely long and involve lots of queen moves, and games with a lot of trades that fizzle out into endgames, which even though are positional, have high minor piece trades.
+Most importantly, the values of both of these features' weights were small, so even though they were on the unexpected side of the spectrum, their influence on the final aggression score was overall small.
+Instead, the greatest influence had ``blunder\_rate\_cp'', ``checks\_per\_move'', and ``captures\_per\_move'', which was the expected result.
+
+\begin{table}[H]
+\centering
+\caption{Features and their Weights on Aggression Score (positive steer towards aggressive, negative towards positional)}
+\label{tab:weights_table}
+\begin{tabular}{c|c}
+\hline
+\textbf{Feature} & \textbf{Weight} \\
+\hline
+captures\_per\_move & 0.466\\
+checks\_per\_move & 0.550\\
+vol\_cp & 0.369\\
+blunder\_rate\_cp & 0.747\\
+low\_time\_frac & 0.178\\
+avg\_legal\_moves & 0.030\\
+num\_ply & -0.062\\
+queen\_activity & 0.155\\
+minor\_piece\_loss & -0.163\\
+pawn\_structure\_vol & 0.113\\
+\hline
+\end{tabular}
+\end{table}
+
+Then, to visualize all this, we applied a 3-dimensional principal component analysis (PCA) (Figure \ref{fig:PCA}), which would also say how well the 10 features describe the dataset.
+The reason why we chose a 3D instead of the more typical 2D PCA was first, that this way more variance would be described and second, because the data is nicely separated in all dimensions.
+We did this separately for each of the six months, firstly because there is more than enough data for the clustering to work well (over 2 million games), and secondly to see whether results would significantly differ between any of the months.
+Because the number of games is similar in each month, statistically the results should be very similar, so a difference could point out possible problems in our thought process.
+Fortunately this was not the case, and for this reason we only show the results for January 2020.
+\begin{figure}[H]
+%\hspace{-3cm}
+\includegraphics[width=\textwidth]{PCA2.pdf}
+\caption{3D PCA January 2020}
+\label{fig:PCA}
+\end{figure}
+As can be seen, the data is very well separated in all three dimensions, which shows that the selected features were indeed relevant for describing the games.
+The clusters were also very well defined, with little overlap between them, which proves that the categorization was effective.
+They were also quite balanced, with the mixed cluster being the smallest, which was expected.
+
+The next step was to train the models on the different datasets.
+For this, we directly employed the training pipeline from Maia2 \cite{maia2}, only changing the datasets used for training.
+For each month, we created three datasets, one for each style of play.
+In order to have balanced datasets and to avoid biasing the models too much towards one style, we combined the games clustered as aggressive with those clustered as mixed to create the aggressive dataset, and similarly for the defensive dataset.
+Then the mixed dataset contained all the games from the month, which also served as a baseline to compare against the official Maia2 model as well.
+We used the same hyperparameters as in Maia2, training each model for only 1 epoch, as the authors found that this was sufficient for convergence.
+Maia2 uses four loss functions, one of which (Total Loss) is the weighted sum of the other three.
+The development of the loss functions during the training of the general model (including all the games) is shown in Figure \ref{fig:loss_stylometry}.
+It is the most relevant model to show, as it used the most data and thus, the convergence can be best observed.
+The Maia loss is the loss of the Maia head, which is the main head of the network, and it is the one that is used for move prediction.
+It drops quickly in the first few steps, then continues to drop more slowly until about 1.8 million games, from where it only fluctuates around a certain value, which shows that the model has converged.
+This shows that Maia2 learns very quickly, with the high amount of data only helping to refine the model, but not being necessary for it to learn the general patterns of human play.
+This plays a greater role in the adversarial training method and is discussed in more detail in Chapter \ref{chapter:adversarial_training}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{loss_stylometry2.pdf}
+\caption{Development of loss functions during training of the general model. Losses quickly drop, converging after less than 3 million games.}
+\label{fig:loss_stylometry}
+\end{figure}
+
+\section{Results}
+\label{subsec:results_behavior_stylometry}
+Evaluating human-aligned chess engines is a difficult task, as there is no clear metric to measure how well the engine mimics human play.
+The typical approach is simply counting the number of times the engine's top choice matches the human move, thus measuring accuracy.
+However, there are many limitations to this approach, as it does not take into account the quality of the move, nor does it consider the context of the game.
+There are positions where multiple moves are equally good, or where the human move is a blunder, and in these cases, simply counting matches does not provide a complete picture of the engine's performance.
+Accuracy is still a useful metric though, as it provides a baseline for comparison between different models.
+Thus, we evaluated the trained models on the test set from Maia2 \cite{maia2}, comparing them with the official Maia2 model, which anyone can directly import and use.
+There are three results to report here: the accuracy of each model on the whole test set (Figure \ref{fig:overall_accuracy}), the accuracy in the opening (first 5 moves) (Figure \ref{fig:opening_accuracy}), and the accuracy in the endgame (after 60 moves) (Figure \ref{fig:endgame_accuracy}).
+All accuracies are reported as the percentage of times the engine's top choice matches the human move, only considering games with opponents in the same Elo bin as the engine (<100 Elo difference).
+This can prove slightly misleading, as all models output a probability distribution over multiple moves, and thus even if the top choice does not match the human move, the human move might still be among the top choices of the engine.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Overall_Accuracy.pdf}
+\caption{Overall Accuracy. The mixed model performs best, even outperforming the official model despite being trained on less data. Tactical performs better at lower levels, while positional performs better at higher levels.}
+\label{fig:overall_accuracy}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Opening_Accuracy.pdf}
+\caption{Opening Accuracy of Models. All three behavior stylometry models significantly outperform the official Maia2 model, showing that training on opening data is indeed useful for improving human-alignment in the opening.}
+\label{fig:opening_accuracy}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{Endgame_Accuracy.pdf}
+\caption{Endgame Accuracy of Models. The official Maia2 model performs best, likely due to the much larger training dataset.}
+\label{fig:endgame_accuracy}
+\end{figure}
+As can be seen, out of our three models, the mixed one performs best, which was to be expected, as it was trained on the most data, and it even outperforms the official Maia2 model at almost all levels.
+Interestingly, all three models outperform the official Maia2 model overall for levels under 1400 Elo, which shows that behavior stylometry can indeed improve human-aligned chess engines.
+The choice to train on opening data as well seems to have paid off, as the opening accuracy is significantly higher for all three models compared to the official Maia2 model.
+The endgame is where the official Maia2 model performs best, though only slightly better than the behavior stylometry models, which is likely due to having seen more endgame positions during training, as the behavior stylometry models had less data to learn from.
+It is also interesting to note that the tactical model performs better at lower levels, while the defensive model performs better at advanced games, which aligns with the intuition that lower-level games have more tactics and blunders, while higher-level games are more positional.
+Overall, these quantitative results are promising, showing that behavior stylometry can indeed improve human-aligned chess engines, but as previously mentioned, accuracy is not a perfect metric, and further research is needed to develop more comprehensive evaluation methods.
+
+\clearpage
+To better understand the differences between the models, we also analyzed their behavior in specific positions.
+Here is a very descriptive example, in a quite popular position that arises from the King's Indian Defense (Figure \ref{fig:example_position}).
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{Comparison1.pdf}
+\caption{Example Position and Model Predictions. Positional model chooses the most popular move Nf3, aggressive model suggests Qd2 looking to weaken black's king, official and mixed model predict Bd3}
+\label{fig:example_position}
+\end{figure}
+
+The official Maia2 model and the mixed model both choose Bd3, which is the second most played move in the database, and a solid, flexible developing move.
+The defensive model chooses the most played move, both at the amateur and master level, Nf3, which is also Stockfish's top choice.
+It is a solid move, preparing to castle, close the center and slowly make progress on the queenside, all typical ideas in the King's Indian Defense, though definitely one of the safer options.
+The aggressive model chooses the third most popular move, Qd2, with the idea of playing Bh6 and trading off the bishop, which is a key defender of black's king.
+The move is definitely more ambitious, aiming to follow up with moves like g4, creating a kingside attack.
+
+All in all, none of the engines do anything radical, but they each suggest slightly different approaches, reflecting the desired playing styles.
+This meets the original expectations quite well, proving behavior stylometry to be a viable method in improving human-aligned chess engines.
+While the results are promising, further research and refinement are needed to fully realize the potential of this approach, in particular regarding the integration of more nuanced behavioral traits and the evaluation metrics used to assess human-likeness in chess engines.

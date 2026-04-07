@@ -1,0 +1,910 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{anyt/global//global/global/global}
+    \entry{image_recognition}{article}{}{}
+      \name{author}{7}{}{%
+        {{hash=3819b482bcf7939eed14e52cf1340c9a}{%
+           family={Adamović},
+           familyi={A\bibinitperiod},
+           given={Saša},
+           giveni={S\bibinitperiod}}}%
+        {{hash=dae350f0f57debc9f1e200337dd1f56b}{%
+           family={Miškovic},
+           familyi={M\bibinitperiod},
+           given={Vladislav},
+           giveni={V\bibinitperiod}}}%
+        {{hash=7c416ca4a9aeb48a034ebf6a491f7f95}{%
+           family={Maček},
+           familyi={M\bibinitperiod},
+           given={Nemanja},
+           giveni={N\bibinitperiod}}}%
+        {{hash=3f5ab0e752b308f414e875589235cb12}{%
+           family={Milosavljević},
+           familyi={M\bibinitperiod},
+           given={Milan},
+           giveni={M\bibinitperiod}}}%
+        {{hash=cfd61302183899a545a2edb4f56cc57a}{%
+           family={Šarac},
+           familyi={Š\bibinitperiod},
+           given={Marko},
+           giveni={M\bibinitperiod}}}%
+        {{hash=3a7e6000b1ff6085f6be80fec0aecf9a}{%
+           family={Saračević},
+           familyi={S\bibinitperiod},
+           given={Muzafer},
+           giveni={M\bibinitperiod}}}%
+        {{hash=756ba0d1a3bc988436fef6d4a7e6ac5f}{%
+           family={Gnjatović},
+           familyi={G\bibinitperiod},
+           given={Milan},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{cd06e6d2386fb3ba482871f10101619f}
+      \strng{fullhash}{223e4ccc09d3f43dc4cfc2f53af43071}
+      \strng{fullhashraw}{223e4ccc09d3f43dc4cfc2f53af43071}
+      \strng{bibnamehash}{223e4ccc09d3f43dc4cfc2f53af43071}
+      \strng{authorbibnamehash}{223e4ccc09d3f43dc4cfc2f53af43071}
+      \strng{authornamehash}{cd06e6d2386fb3ba482871f10101619f}
+      \strng{authorfullhash}{223e4ccc09d3f43dc4cfc2f53af43071}
+      \strng{authorfullhashraw}{223e4ccc09d3f43dc4cfc2f53af43071}
+      \field{labelalpha}{AMM+20}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{0167-739X}
+      \field{journaltitle}{Future Generation Computer Systems}
+      \field{title}{An efficient novel approach for iris recognition based on stylometric features and machine learning techniques}
+      \field{volume}{107}
+      \field{year}{2020}
+      \field{pages}{144\bibrangedash 157}
+      \range{pages}{14}
+      \verb{doi}
+      \verb https://doi.org/10.1016/j.future.2020.01.056
+      \endverb
+      \verb{urlraw}
+      \verb https://www.sciencedirect.com/science/article/pii/S0167739X19314463
+      \endverb
+      \verb{url}
+      \verb https://www.sciencedirect.com/science/article/pii/S0167739X19314463
+      \endverb
+    \endentry
+    \entry{chess_com_stats}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=cd87a9ba9af07b34c9e0e1f004d7f176}{%
+           family={{Chess.com}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Chess.com LLC}%
+      }
+      \strng{namehash}{cd87a9ba9af07b34c9e0e1f004d7f176}
+      \strng{fullhash}{cd87a9ba9af07b34c9e0e1f004d7f176}
+      \strng{fullhashraw}{cd87a9ba9af07b34c9e0e1f004d7f176}
+      \strng{bibnamehash}{cd87a9ba9af07b34c9e0e1f004d7f176}
+      \strng{authorbibnamehash}{cd87a9ba9af07b34c9e0e1f004d7f176}
+      \strng{authornamehash}{cd87a9ba9af07b34c9e0e1f004d7f176}
+      \strng{authorfullhash}{cd87a9ba9af07b34c9e0e1f004d7f176}
+      \strng{authorfullhashraw}{cd87a9ba9af07b34c9e0e1f004d7f176}
+      \field{labelalpha}{Che26}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Chess Leaderboards \& Chess Rankings}
+      \field{urlday}{16}
+      \field{urlmonth}{1}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.chess.com/leaderboard
+      \endverb
+      \verb{url}
+      \verb https://www.chess.com/leaderboard
+      \endverb
+    \endentry
+    \entry{author_identification}{inproceedings}{}{}
+      \name{author}{1}{}{%
+        {{hash=de80d83604a86dc9aff51ca1ce3069e6}{%
+           family={Daelemans},
+           familyi={D\bibinitperiod},
+           given={Walter},
+           giveni={W\bibinitperiod}}}%
+      }
+      \name{editor}{1}{}{%
+        {{hash=d44b430403500a33ea0e21b5148f9af4}{%
+           family={Gelbukh},
+           familyi={G\bibinitperiod},
+           given={Alexander},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Berlin, Heidelberg}%
+      }
+      \list{publisher}{1}{%
+        {Springer Berlin Heidelberg}%
+      }
+      \strng{namehash}{de80d83604a86dc9aff51ca1ce3069e6}
+      \strng{fullhash}{de80d83604a86dc9aff51ca1ce3069e6}
+      \strng{fullhashraw}{de80d83604a86dc9aff51ca1ce3069e6}
+      \strng{bibnamehash}{de80d83604a86dc9aff51ca1ce3069e6}
+      \strng{authorbibnamehash}{de80d83604a86dc9aff51ca1ce3069e6}
+      \strng{authornamehash}{de80d83604a86dc9aff51ca1ce3069e6}
+      \strng{authorfullhash}{de80d83604a86dc9aff51ca1ce3069e6}
+      \strng{authorfullhashraw}{de80d83604a86dc9aff51ca1ce3069e6}
+      \strng{editorbibnamehash}{d44b430403500a33ea0e21b5148f9af4}
+      \strng{editornamehash}{d44b430403500a33ea0e21b5148f9af4}
+      \strng{editorfullhash}{d44b430403500a33ea0e21b5148f9af4}
+      \strng{editorfullhashraw}{d44b430403500a33ea0e21b5148f9af4}
+      \field{labelalpha}{Dae13}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Computational Linguistics and Intelligent Text Processing}
+      \field{isbn}{978-3-642-37256-8}
+      \field{title}{Explanation in Computational Stylometry}
+      \field{year}{2013}
+      \field{pages}{451\bibrangedash 462}
+      \range{pages}{12}
+    \endentry
+    \entry{fraud_detection}{inproceedings}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{3}{}{%
+        {{hash=86003bfe11429923baf8e86830515e72}{%
+           family={Fersini},
+           familyi={F\bibinitperiod},
+           given={Elisabetta},
+           giveni={E\bibinitperiod}}}%
+        {{hash=3cc09c24b96800a4b5ba825057fe66b0}{%
+           family={Armanini},
+           familyi={A\bibinitperiod},
+           given={Justin},
+           giveni={J\bibinitperiod}}}%
+        {{hash=02333cd441ccf7a4443b2695e4eda5ce}{%
+           family={D'Intorni},
+           familyi={D\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{57b72523eec3c7573fb69b169ca8d2be}
+      \strng{fullhash}{6c32241af0d38d447195a1bd1d0fbe28}
+      \strng{fullhashraw}{6c32241af0d38d447195a1bd1d0fbe28}
+      \strng{bibnamehash}{6c32241af0d38d447195a1bd1d0fbe28}
+      \strng{authorbibnamehash}{6c32241af0d38d447195a1bd1d0fbe28}
+      \strng{authornamehash}{57b72523eec3c7573fb69b169ca8d2be}
+      \strng{authorfullhash}{6c32241af0d38d447195a1bd1d0fbe28}
+      \strng{authorfullhashraw}{6c32241af0d38d447195a1bd1d0fbe28}
+      \field{labelalpha}{FAD+20}
+      \field{sortinit}{F}
+      \field{sortinithash}{2638baaa20439f1b5a8f80c6c08a13b4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{CLEF (Working Notes)}
+      \field{title}{Profiling Fake News Spreaders: Stylometry, Personality, Emotions and Embeddings.}
+      \field{year}{2020}
+    \endentry
+    \entry{alphazero_cheat_sheet}{online}{}{}
+      \name{author}{1}{}{%
+        {{hash=3a63f6e7314a41240432f5b1aaa56827}{%
+           family={Foster},
+           familyi={F\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Medium}%
+      }
+      \strng{namehash}{3a63f6e7314a41240432f5b1aaa56827}
+      \strng{fullhash}{3a63f6e7314a41240432f5b1aaa56827}
+      \strng{fullhashraw}{3a63f6e7314a41240432f5b1aaa56827}
+      \strng{bibnamehash}{3a63f6e7314a41240432f5b1aaa56827}
+      \strng{authorbibnamehash}{3a63f6e7314a41240432f5b1aaa56827}
+      \strng{authornamehash}{3a63f6e7314a41240432f5b1aaa56827}
+      \strng{authorfullhash}{3a63f6e7314a41240432f5b1aaa56827}
+      \strng{authorfullhashraw}{3a63f6e7314a41240432f5b1aaa56827}
+      \field{labelalpha}{Fos17}
+      \field{sortinit}{F}
+      \field{sortinithash}{2638baaa20439f1b5a8f80c6c08a13b4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Applied Data Science}
+      \field{title}{AlphaGo Zero Explained In One Diagram}
+      \field{urlday}{16}
+      \field{urlmonth}{1}
+      \field{urlyear}{2026}
+      \field{year}{2017}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://medium.com/applied-data-science/alphago-zero-explained-in-one-diagram-365f5abf67e0
+      \endverb
+      \verb{url}
+      \verb https://medium.com/applied-data-science/alphago-zero-explained-in-one-diagram-365f5abf67e0
+      \endverb
+    \endentry
+    \entry{user_authentication}{article}{}{}
+      \name{author}{4}{}{%
+        {{hash=bb1e626448881c165113433ac91036b9}{%
+           family={Fridman},
+           familyi={F\bibinitperiod},
+           given={Lex},
+           giveni={L\bibinitperiod}}}%
+        {{hash=5f5ecad78c4388605f48190b30ca6f0b}{%
+           family={Weber},
+           familyi={W\bibinitperiod},
+           given={Steven},
+           giveni={S\bibinitperiod}}}%
+        {{hash=c2c72fc578663fab79fc999080ccbcbd}{%
+           family={Greenstadt},
+           familyi={G\bibinitperiod},
+           given={Rachel},
+           giveni={R\bibinitperiod}}}%
+        {{hash=a94b6b1d92543c88cb9f13361e411c97}{%
+           family={Kam},
+           familyi={K\bibinitperiod},
+           given={Moshe},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{0cb20b778602b2fb9cf21a2f763346f9}
+      \strng{fullhash}{cda5a11bbb3143088e3070e6239f595f}
+      \strng{fullhashraw}{cda5a11bbb3143088e3070e6239f595f}
+      \strng{bibnamehash}{cda5a11bbb3143088e3070e6239f595f}
+      \strng{authorbibnamehash}{cda5a11bbb3143088e3070e6239f595f}
+      \strng{authornamehash}{0cb20b778602b2fb9cf21a2f763346f9}
+      \strng{authorfullhash}{cda5a11bbb3143088e3070e6239f595f}
+      \strng{authorfullhashraw}{cda5a11bbb3143088e3070e6239f595f}
+      \field{labelalpha}{FWGK17}
+      \field{sortinit}{F}
+      \field{sortinithash}{2638baaa20439f1b5a8f80c6c08a13b4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Systems Journal}
+      \field{number}{2}
+      \field{title}{Active Authentication on Mobile Devices via Stylometry, Application Usage, Web Browsing, and GPS Location}
+      \field{volume}{11}
+      \field{year}{2017}
+      \field{pages}{513\bibrangedash 521}
+      \range{pages}{9}
+      \verb{doi}
+      \verb 10.1109/JSYST.2015.2472579
+      \endverb
+    \endentry
+    \entry{harmonia}{inproceedings}{}{}
+      \name{author}{2}{}{%
+        {{hash=01f7f3a09da8bdd2a742a52c2935e123}{%
+           family={Hari\bibnamedelima Sekar},
+           familyi={H\bibinitperiod\bibinitdelim S\bibinitperiod},
+           given={Easwar\bibnamedelima Gnana},
+           giveni={E\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+        {{hash=d8035465df227ae579babc639011e7f8}{%
+           family={Jin},
+           familyi={J\bibinitperiod},
+           given={Roger},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{c8bd099a08c9b8854922ca6c46068090}
+      \strng{fullhash}{c8bd099a08c9b8854922ca6c46068090}
+      \strng{fullhashraw}{c8bd099a08c9b8854922ca6c46068090}
+      \strng{bibnamehash}{c8bd099a08c9b8854922ca6c46068090}
+      \strng{authorbibnamehash}{c8bd099a08c9b8854922ca6c46068090}
+      \strng{authornamehash}{c8bd099a08c9b8854922ca6c46068090}
+      \strng{authorfullhash}{c8bd099a08c9b8854922ca6c46068090}
+      \strng{authorfullhashraw}{c8bd099a08c9b8854922ca6c46068090}
+      \field{labelalpha}{HJ25}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2025 IEEE Conference on Artificial Intelligence (CAI)}
+      \field{title}{Human-Aligned Chess AI: A Multitask Transformer for Humanlike Decision-Making}
+      \field{year}{2025}
+      \field{pages}{1230\bibrangedash 1234}
+      \range{pages}{5}
+      \verb{doi}
+      \verb 10.1109/CAI64502.2025.00213
+      \endverb
+    \endentry
+    \entry{deepblue}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=cbf44511d041dc6d1dd73cc0c033122c}{%
+           family={{IBM}},
+           familyi={I\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {IBM}%
+      }
+      \strng{namehash}{cbf44511d041dc6d1dd73cc0c033122c}
+      \strng{fullhash}{cbf44511d041dc6d1dd73cc0c033122c}
+      \strng{fullhashraw}{cbf44511d041dc6d1dd73cc0c033122c}
+      \strng{bibnamehash}{cbf44511d041dc6d1dd73cc0c033122c}
+      \strng{authorbibnamehash}{cbf44511d041dc6d1dd73cc0c033122c}
+      \strng{authornamehash}{cbf44511d041dc6d1dd73cc0c033122c}
+      \strng{authorfullhash}{cbf44511d041dc6d1dd73cc0c033122c}
+      \strng{authorfullhashraw}{cbf44511d041dc6d1dd73cc0c033122c}
+      \field{labelalpha}{IBM24}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Deep Blue}
+      \field{urlday}{16}
+      \field{urlmonth}{1}
+      \field{urlyear}{2026}
+      \field{year}{2024}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.ibm.com/history/deep-blue
+      \endverb
+      \verb{url}
+      \verb https://www.ibm.com/history/deep-blue
+      \endverb
+    \endentry
+    \entry{leela}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=8a03fa953f40f33a174d902960e116b3}{%
+           family={{LCZero Project}},
+           familyi={L\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Leela Chess Zero Team}%
+      }
+      \strng{namehash}{8a03fa953f40f33a174d902960e116b3}
+      \strng{fullhash}{8a03fa953f40f33a174d902960e116b3}
+      \strng{fullhashraw}{8a03fa953f40f33a174d902960e116b3}
+      \strng{bibnamehash}{8a03fa953f40f33a174d902960e116b3}
+      \strng{authorbibnamehash}{8a03fa953f40f33a174d902960e116b3}
+      \strng{authornamehash}{8a03fa953f40f33a174d902960e116b3}
+      \strng{authorfullhash}{8a03fa953f40f33a174d902960e116b3}
+      \strng{authorfullhashraw}{8a03fa953f40f33a174d902960e116b3}
+      \field{labelalpha}{LCZ26}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Leela Chess Zero}
+      \field{urlday}{16}
+      \field{urlmonth}{1}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://lczero.org
+      \endverb
+      \verb{url}
+      \verb https://lczero.org
+      \endverb
+    \endentry
+    \entry{chess_stylometry2}{inproceedings}{}{}
+      \name{author}{3}{}{%
+        {{hash=36a6831ffc867d7e315f6aff62e3e040}{%
+           family={Mujagić},
+           familyi={M\bibinitperiod},
+           given={Amar},
+           giveni={A\bibinitperiod}}}%
+        {{hash=5718f3885ca9989de1523b11006ede3b}{%
+           family={Mujagić},
+           familyi={M\bibinitperiod},
+           given={Adnan},
+           giveni={A\bibinitperiod}}}%
+        {{hash=12757b219f679c6dcd2bde57dedea2e9}{%
+           family={Mehanović},
+           familyi={M\bibinitperiod},
+           given={Dželila},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{9f501817c3fd6ac41c490d321f883d54}
+      \strng{fullhash}{4ddda1f37e84586a0881fe75a6bbb08d}
+      \strng{fullhashraw}{4ddda1f37e84586a0881fe75a6bbb08d}
+      \strng{bibnamehash}{4ddda1f37e84586a0881fe75a6bbb08d}
+      \strng{authorbibnamehash}{4ddda1f37e84586a0881fe75a6bbb08d}
+      \strng{authornamehash}{9f501817c3fd6ac41c490d321f883d54}
+      \strng{authorfullhash}{4ddda1f37e84586a0881fe75a6bbb08d}
+      \strng{authorfullhashraw}{4ddda1f37e84586a0881fe75a6bbb08d}
+      \field{labelalpha}{MMM24}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{International Symposium on Innovative and Interdisciplinary Applications of Advanced Technologies}
+      \field{title}{Predictive Analysis of Chess Player Performance: An Analysis of Factors Influencing Competitive Success Using Machine Learning Techniques}
+      \field{year}{2024}
+      \field{pages}{392\bibrangedash 408}
+      \range{pages}{17}
+    \endentry
+    \entry{maia}{inproceedings}{}{}
+      \name{author}{4}{}{%
+        {{hash=2cf2324d65e85ba86bc55b2fa7eac521}{%
+           family={McIlroy-Young},
+           familyi={M\bibinithyphendelim Y\bibinitperiod},
+           given={Reid},
+           giveni={R\bibinitperiod}}}%
+        {{hash=93e831e3cf4ad19da7cb8887340fe8c7}{%
+           family={Sen},
+           familyi={S\bibinitperiod},
+           given={Siddhartha},
+           giveni={S\bibinitperiod}}}%
+        {{hash=e405ae3c720db1b0e447ff5b601b968f}{%
+           family={Kleinberg},
+           familyi={K\bibinitperiod},
+           given={Jon},
+           giveni={J\bibinitperiod}}}%
+        {{hash=d4d108e241cb531c8366633a9b4f0361}{%
+           family={Anderson},
+           familyi={A\bibinitperiod},
+           given={Ashton},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Virtual Event, CA, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{55957daa46a45e82b35d19dd9883e213}
+      \strng{fullhash}{88be61bb5cb2452633aaf991caaa90c0}
+      \strng{fullhashraw}{88be61bb5cb2452633aaf991caaa90c0}
+      \strng{bibnamehash}{88be61bb5cb2452633aaf991caaa90c0}
+      \strng{authorbibnamehash}{88be61bb5cb2452633aaf991caaa90c0}
+      \strng{authornamehash}{55957daa46a45e82b35d19dd9883e213}
+      \strng{authorfullhash}{88be61bb5cb2452633aaf991caaa90c0}
+      \strng{authorfullhashraw}{88be61bb5cb2452633aaf991caaa90c0}
+      \field{extraname}{1}
+      \field{labelalpha}{MSKA20}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 26th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining}
+      \field{isbn}{9781450379984}
+      \field{series}{KDD '20}
+      \field{title}{Aligning Superhuman AI with Human Behavior: Chess as a Model System}
+      \field{year}{2020}
+      \field{pages}{1677\bibrangedash 1687}
+      \range{pages}{11}
+      \verb{doi}
+      \verb 10.1145/3394486.3403219
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/3394486.3403219
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/3394486.3403219
+      \endverb
+      \keyw{human-ai collaboration,chess,action prediction}
+    \endentry
+    \entry{chess_stylometry1}{misc}{}{}
+      \name{author}{5}{}{%
+        {{hash=2cf2324d65e85ba86bc55b2fa7eac521}{%
+           family={McIlroy-Young},
+           familyi={M\bibinithyphendelim Y\bibinitperiod},
+           given={Reid},
+           giveni={R\bibinitperiod}}}%
+        {{hash=ac4d1211163b0b68f874b75884785cf2}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Russell},
+           giveni={R\bibinitperiod}}}%
+        {{hash=93e831e3cf4ad19da7cb8887340fe8c7}{%
+           family={Sen},
+           familyi={S\bibinitperiod},
+           given={Siddhartha},
+           giveni={S\bibinitperiod}}}%
+        {{hash=e405ae3c720db1b0e447ff5b601b968f}{%
+           family={Kleinberg},
+           familyi={K\bibinitperiod},
+           given={Jon},
+           giveni={J\bibinitperiod}}}%
+        {{hash=d4d108e241cb531c8366633a9b4f0361}{%
+           family={Anderson},
+           familyi={A\bibinitperiod},
+           given={Ashton},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{55957daa46a45e82b35d19dd9883e213}
+      \strng{fullhash}{314ba391219ea00f36d6f82e6a6e07d2}
+      \strng{fullhashraw}{314ba391219ea00f36d6f82e6a6e07d2}
+      \strng{bibnamehash}{314ba391219ea00f36d6f82e6a6e07d2}
+      \strng{authorbibnamehash}{314ba391219ea00f36d6f82e6a6e07d2}
+      \strng{authornamehash}{55957daa46a45e82b35d19dd9883e213}
+      \strng{authorfullhash}{314ba391219ea00f36d6f82e6a6e07d2}
+      \strng{authorfullhashraw}{314ba391219ea00f36d6f82e6a6e07d2}
+      \field{extraname}{2}
+      \field{labelalpha}{MWS+22}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{cs.AI}
+      \field{eprinttype}{arXiv}
+      \field{title}{Detecting Individual Decision-Making Style: Exploring Behavioral Stylometry in Chess}
+      \field{year}{2022}
+      \verb{eprint}
+      \verb 2208.01366
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/2208.01366
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/2208.01366
+      \endverb
+    \endentry
+    \entry{chess_computer_history}{bachelorsthesis}{}{}
+      \name{author}{1}{}{%
+        {{hash=a915eb96867f67986838b6beb3c1b1b5}{%
+           family={Siven},
+           familyi={S\bibinitperiod},
+           given={Artturi},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Lappeenranta-Lahti University of Technology LUT}%
+      }
+      \list{location}{1}{%
+        {Lappeenranta, Finland}%
+      }
+      \strng{namehash}{a915eb96867f67986838b6beb3c1b1b5}
+      \strng{fullhash}{a915eb96867f67986838b6beb3c1b1b5}
+      \strng{fullhashraw}{a915eb96867f67986838b6beb3c1b1b5}
+      \strng{bibnamehash}{a915eb96867f67986838b6beb3c1b1b5}
+      \strng{authorbibnamehash}{a915eb96867f67986838b6beb3c1b1b5}
+      \strng{authornamehash}{a915eb96867f67986838b6beb3c1b1b5}
+      \strng{authorfullhash}{a915eb96867f67986838b6beb3c1b1b5}
+      \strng{authorfullhashraw}{a915eb96867f67986838b6beb3c1b1b5}
+      \field{labelalpha}{Siv24}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Systematic analysis of the evolution of chess computers}
+      \field{type}{Bachelor's thesis}
+      \field{year}{2024}
+      \verb{urlraw}
+      \verb https://lutpub.lut.fi/handle/10024/168185
+      \endverb
+      \verb{url}
+      \verb https://lutpub.lut.fi/handle/10024/168185
+      \endverb
+      \keyw{chess computers,algorithmic advancements,chess computer history,chess algorithms}
+    \endentry
+    \entry{stockfish}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=a786c920883c820e4b0a70b32e512ecf}{%
+           family={{Stockfish Development Team}},
+           familyi={S\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Stockfish Project}%
+      }
+      \strng{namehash}{a786c920883c820e4b0a70b32e512ecf}
+      \strng{fullhash}{a786c920883c820e4b0a70b32e512ecf}
+      \strng{fullhashraw}{a786c920883c820e4b0a70b32e512ecf}
+      \strng{bibnamehash}{a786c920883c820e4b0a70b32e512ecf}
+      \strng{authorbibnamehash}{a786c920883c820e4b0a70b32e512ecf}
+      \strng{authornamehash}{a786c920883c820e4b0a70b32e512ecf}
+      \strng{authorfullhash}{a786c920883c820e4b0a70b32e512ecf}
+      \strng{authorfullhashraw}{a786c920883c820e4b0a70b32e512ecf}
+      \field{labelalpha}{Sto26}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Stockfish - Strong open-source chess engine}
+      \field{urlday}{16}
+      \field{urlmonth}{1}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://stockfishchess.org
+      \endverb
+      \verb{url}
+      \verb https://stockfishchess.org
+      \endverb
+    \endentry
+    \entry{maia2}{inproceedings}{}{}
+      \name{author}{6}{}{%
+        {{hash=e973cc85bb987736f631a2381dcad495}{%
+           family={Tang},
+           familyi={T\bibinitperiod},
+           given={Zhenwei},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=52ddd0263599023cf0f3c6f5b9bb9c1f}{%
+           family={Jiao},
+           familyi={J\bibinitperiod},
+           given={Difan},
+           giveni={D\bibinitperiod}}}%
+        {{hash=2cf2324d65e85ba86bc55b2fa7eac521}{%
+           family={McIlroy-Young},
+           familyi={M\bibinithyphendelim Y\bibinitperiod},
+           given={Reid},
+           giveni={R\bibinitperiod}}}%
+        {{hash=e405ae3c720db1b0e447ff5b601b968f}{%
+           family={Kleinberg},
+           familyi={K\bibinitperiod},
+           given={Jon},
+           giveni={J\bibinitperiod}}}%
+        {{hash=93e831e3cf4ad19da7cb8887340fe8c7}{%
+           family={Sen},
+           familyi={S\bibinitperiod},
+           given={Siddhartha},
+           giveni={S\bibinitperiod}}}%
+        {{hash=d4d108e241cb531c8366633a9b4f0361}{%
+           family={Anderson},
+           familyi={A\bibinitperiod},
+           given={Ashton},
+           giveni={A\bibinitperiod}}}%
+      }
+      \name{editor}{7}{}{%
+        {{hash=fbc410321d4ef88338a144a263d84a52}{%
+           family={Globerson},
+           familyi={G\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+        {{hash=e7447a28bd473ef5e8152edb91128f2b}{%
+           family={Mackey},
+           familyi={M\bibinitperiod},
+           given={L.},
+           giveni={L\bibinitperiod}}}%
+        {{hash=cbb0ac3a625af607c7b2347f3a1f6eec}{%
+           family={Belgrave},
+           familyi={B\bibinitperiod},
+           given={D.},
+           giveni={D\bibinitperiod}}}%
+        {{hash=1d2ac2a4357d536eb2d202b38a5ecc5d}{%
+           family={Fan},
+           familyi={F\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod}}}%
+        {{hash=bc2b28beef4ec09a22425f7ef2b357d0}{%
+           family={Paquet},
+           familyi={P\bibinitperiod},
+           given={U.},
+           giveni={U\bibinitperiod}}}%
+        {{hash=d20108b268da49090089b4db6ab51064}{%
+           family={Tomczak},
+           familyi={T\bibinitperiod},
+           given={J.},
+           giveni={J\bibinitperiod}}}%
+        {{hash=08835018e7f90fcf262517bf88eb4d72}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={C.},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Curran Associates, Inc.}%
+      }
+      \strng{namehash}{8eaecf6884c3cf370f1e1320ffebca2d}
+      \strng{fullhash}{ceb9bc99861873868482c40aedaddc50}
+      \strng{fullhashraw}{ceb9bc99861873868482c40aedaddc50}
+      \strng{bibnamehash}{ceb9bc99861873868482c40aedaddc50}
+      \strng{authorbibnamehash}{ceb9bc99861873868482c40aedaddc50}
+      \strng{authornamehash}{8eaecf6884c3cf370f1e1320ffebca2d}
+      \strng{authorfullhash}{ceb9bc99861873868482c40aedaddc50}
+      \strng{authorfullhashraw}{ceb9bc99861873868482c40aedaddc50}
+      \strng{editorbibnamehash}{95f888c875167175c5f0367be32a7c09}
+      \strng{editornamehash}{383be33481471c99d175191350613bbe}
+      \strng{editorfullhash}{95f888c875167175c5f0367be32a7c09}
+      \strng{editorfullhashraw}{95f888c875167175c5f0367be32a7c09}
+      \field{labelalpha}{TJM+24}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Advances in Neural Information Processing Systems}
+      \field{title}{Maia-2: A Unified Model for Human-AI Alignment in Chess}
+      \field{volume}{37}
+      \field{year}{2024}
+      \field{pages}{20919\bibrangedash 20944}
+      \range{pages}{26}
+      \verb{doi}
+      \verb 10.52202/079017-0659
+      \endverb
+      \verb{urlraw}
+      \verb https://proceedings.neurips.cc/paper_files/paper/2024/file/250190819ff1dda47cd23cecc0c5a69b-Paper-Conference.pdf
+      \endverb
+      \verb{url}
+      \verb https://proceedings.neurips.cc/paper_files/paper/2024/file/250190819ff1dda47cd23cecc0c5a69b-Paper-Conference.pdf
+      \endverb
+    \endentry
+    \entry{speech_recognition}{inproceedings}{}{}
+      \name{author}{5}{}{%
+        {{hash=bc8f26de14d904529991508a896210c1}{%
+           family={Variani},
+           familyi={V\bibinitperiod},
+           given={Ehsan},
+           giveni={E\bibinitperiod}}}%
+        {{hash=d271ccf1c31c537090c7a8f2406b0efc}{%
+           family={Lei},
+           familyi={L\bibinitperiod},
+           given={Xin},
+           giveni={X\bibinitperiod}}}%
+        {{hash=efe93a4c13ab7284a6874f12f483e899}{%
+           family={McDermott},
+           familyi={M\bibinitperiod},
+           given={Erik},
+           giveni={E\bibinitperiod}}}%
+        {{hash=b9c252f9ce814cedd571047fc69c3a88}{%
+           family={Moreno},
+           familyi={M\bibinitperiod},
+           given={Ignacio\bibnamedelima Lopez},
+           giveni={I\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+        {{hash=16b36706776d4ad10d397ab22d2c467a}{%
+           family={Gonzalez-Dominguez},
+           familyi={G\bibinithyphendelim D\bibinitperiod},
+           given={Javier},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {IEEE}%
+      }
+      \strng{namehash}{a1248075bebc06205b2cfa6e3aa81839}
+      \strng{fullhash}{0a23f30b3f94261ed6a9ee0d51515ada}
+      \strng{fullhashraw}{0a23f30b3f94261ed6a9ee0d51515ada}
+      \strng{bibnamehash}{0a23f30b3f94261ed6a9ee0d51515ada}
+      \strng{authorbibnamehash}{0a23f30b3f94261ed6a9ee0d51515ada}
+      \strng{authornamehash}{a1248075bebc06205b2cfa6e3aa81839}
+      \strng{authorfullhash}{0a23f30b3f94261ed6a9ee0d51515ada}
+      \strng{authorfullhashraw}{0a23f30b3f94261ed6a9ee0d51515ada}
+      \field{labelalpha}{VLM+14}
+      \field{sortinit}{V}
+      \field{sortinithash}{afb52128e5b4dc4b843768c0113d673b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2014 IEEE international conference on acoustics, speech and signal processing (ICASSP)}
+      \field{title}{Deep neural networks for small footprint text-dependent speaker verification}
+      \field{year}{2014}
+      \field{pages}{4052\bibrangedash 4056}
+      \range{pages}{5}
+    \endentry
+    \entry{allie}{misc}{}{}
+      \name{author}{5}{}{%
+        {{hash=48540ab19babee8b0fce44107f8af583}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Yiming},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=15c2df873154b95e96ceca7f33f46f20}{%
+           family={Jacob},
+           familyi={J\bibinitperiod},
+           given={Athul\bibnamedelima Paul},
+           giveni={A\bibinitperiod\bibinitdelim P\bibinitperiod}}}%
+        {{hash=6987c0fc8fcb6ec9d1865b01f403de48}{%
+           family={Lai},
+           familyi={L\bibinitperiod},
+           given={Vivian},
+           giveni={V\bibinitperiod}}}%
+        {{hash=8c0d6317a5a127c222cb122f7818e15e}{%
+           family={Fried},
+           familyi={F\bibinitperiod},
+           given={Daniel},
+           giveni={D\bibinitperiod}}}%
+        {{hash=f0b22a1a9ec5b2901f5e0cb457612e93}{%
+           family={Ippolito},
+           familyi={I\bibinitperiod},
+           given={Daphne},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{09bda8e53369330bea1700ec09ffcf1c}
+      \strng{fullhash}{434ec4e14ba75f7f0b7e4b983afd5c96}
+      \strng{fullhashraw}{434ec4e14ba75f7f0b7e4b983afd5c96}
+      \strng{bibnamehash}{434ec4e14ba75f7f0b7e4b983afd5c96}
+      \strng{authorbibnamehash}{434ec4e14ba75f7f0b7e4b983afd5c96}
+      \strng{authornamehash}{09bda8e53369330bea1700ec09ffcf1c}
+      \strng{authorfullhash}{434ec4e14ba75f7f0b7e4b983afd5c96}
+      \strng{authorfullhashraw}{434ec4e14ba75f7f0b7e4b983afd5c96}
+      \field{labelalpha}{ZJL+24}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{cs.LG}
+      \field{eprinttype}{arXiv}
+      \field{title}{Human-aligned Chess with a Bit of Search}
+      \field{year}{2024}
+      \verb{eprint}
+      \verb 2410.03893
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/2410.03893
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/2410.03893
+      \endverb
+    \endentry
+    \entry{alphazero}{inbook}{}{}
+      \name{author}{2}{}{%
+        {{hash=e496ce899eb8294d0b408dc8dd0e6f62}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Hongming},
+           giveni={H\bibinitperiod}}}%
+        {{hash=3f4e2e76f4ac8c212bccfef916dfc863}{%
+           family={Yu},
+           familyi={Y\bibinitperiod},
+           given={Tianyang},
+           giveni={T\bibinitperiod}}}%
+      }
+      \name{editor}{3}{}{%
+        {{hash=e16b03661fdfbcf39546885a68509604}{%
+           family={Dong},
+           familyi={D\bibinitperiod},
+           given={Hao},
+           giveni={H\bibinitperiod}}}%
+        {{hash=69be9a2ddb72adc9042f98972e2f00aa}{%
+           family={Ding},
+           familyi={D\bibinitperiod},
+           given={Zihan},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=452a67ad1218340845acd7e598d57f19}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Shanghang},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Singapore}%
+      }
+      \list{publisher}{1}{%
+        {Springer Singapore}%
+      }
+      \strng{namehash}{481e835155610282628054ca5b32a5ce}
+      \strng{fullhash}{481e835155610282628054ca5b32a5ce}
+      \strng{fullhashraw}{481e835155610282628054ca5b32a5ce}
+      \strng{bibnamehash}{481e835155610282628054ca5b32a5ce}
+      \strng{authorbibnamehash}{481e835155610282628054ca5b32a5ce}
+      \strng{authornamehash}{481e835155610282628054ca5b32a5ce}
+      \strng{authorfullhash}{481e835155610282628054ca5b32a5ce}
+      \strng{authorfullhashraw}{481e835155610282628054ca5b32a5ce}
+      \strng{editorbibnamehash}{35dc9e43f6d67bd4fec09f1c4d91c352}
+      \strng{editornamehash}{6b43a2e98f07ead3461a498e8de1a83b}
+      \strng{editorfullhash}{35dc9e43f6d67bd4fec09f1c4d91c352}
+      \strng{editorfullhashraw}{35dc9e43f6d67bd4fec09f1c4d91c352}
+      \field{labelalpha}{ZY20}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Deep Reinforcement Learning: Fundamentals, Research and Applications}
+      \field{isbn}{978-981-15-4095-0}
+      \field{title}{AlphaZero}
+      \field{year}{2020}
+      \field{pages}{391\bibrangedash 415}
+      \range{pages}{25}
+      \verb{doi}
+      \verb 10.1007/978-981-15-4095-0_15
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1007/978-981-15-4095-0_15
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1007/978-981-15-4095-0_15
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
