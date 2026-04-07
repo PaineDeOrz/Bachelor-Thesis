@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#SBATCH --partition=slowlane
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=64
+#SBATCH --nodes=1
+#SBATCH --mem=128G
+#SBATCH --time=0-12:00:00
+#SBATCH --gpus=A40:2
+#SBATCH --output=%u_maia2_train_%j.out
+#SBATCH --job-name=maia2-train
+#SBATCH --chdir=/mnt/nfs/home/st188776/Cod/Antrenat/maia2_GAN/maia2
+
+module load CUDA
+
+source /mnt/nfs/home/st188776/Cod/.venv/bin/activate
+
+cd /mnt/nfs/home/st188776/Cod/Antrenat/maia2_GAN/maia2
+
+python run_train.py

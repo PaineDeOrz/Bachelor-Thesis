@@ -1,0 +1,97 @@
+# GENERAL
+# ============================================================================
+data_root: "dataset"
+seed: 42
+num_workers: 50
+num_cpu_left: 8
+queue_length: 50
+device: "cuda"
+num_gpus: 1
+use_amp: true
+verbose: 1
+
+max_epochs: 1
+from_checkpoint: false
+checkpoint_name: "lichess_db_standard_rated_2022-09_e1_f9_c165_20260221-082705.pt"
+
+# Dataset range
+start_year: 2022
+start_month: 1
+end_year: 2022
+end_month: 12
+
+# PGN processing
+max_ply: 300
+clock_threshold: 0
+chunk_size: 5000
+max_games_per_elo_range: 100000000
+
+# ============================================================================
+# GENERATOR (MAIA)
+# ============================================================================
+lr: 0.0001
+wd: 0.00001
+batch_size: 16002              # Reduced for GAN stability
+first_n_moves: 0
+last_n_moves: 0
+
+gen_grad_clip: 1.0
+
+# ============================================================================
+# DISCRIMINATOR (WGAN Critic)
+# ============================================================================
+use_adversarial: true
+use_wgan_stgan: true
+
+lr_d: 0.0001
+wd_d: 0.00005
+gp_lambda: 1
+
+disc_batch_size: 1024
+d_steps_per_g: 5              #Make 5 for WGAN
+
+weight_clip: 0.1              # FOR WGAN
+disc_grad_clip: 0.5
+freeze_discriminator: false
+pretrain_discriminator: true
+discriminator_path: "discriminator_wgan_cleaned.pt"
+
+# ============================================================================
+# ADVERSARIAL STRENGTH
+# ============================================================================
+style_lambda: 0.1             # Start small for stability
+gumbel_tau: 1.0
+fake_move_temperature: 0.8
+lambda_gp: 0.5
+fake_move_samples: 1
+
+# ============================================================================
+# MODEL ARCHITECTURE
+# ============================================================================
+input_channels: 18
+
+dim_cnn: 256
+num_blocks_cnn: 5
+
+dim_vit: 1024
+num_blocks_vit: 2
+vit_length: 8
+
+elo_dim: 128
+
+# ============================================================================
+# AUXILIARY TASKS
+# ============================================================================
+side_info: true
+side_info_coefficient: 1.0
+
+value: true
+value_coefficient: 1.0
+
+# ============================================================================
+# LOGGING & CHECKPOINTING
+# ============================================================================
+log_interval: 50
+save_interval: 5
+wandb_project: "maia2-wgan"
+run_name: "maia2-wgan-v1"

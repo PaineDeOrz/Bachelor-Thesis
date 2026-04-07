@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#SBATCH --partition=slowlane
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=64
+#SBATCH --nodes=1
+#SBATCH --mem=32G
+#SBATCH --time=0-01:00:00
+#SBATCH --gpus=A40:2
+#SBATCH --output=%u_job_%j.out
+#SBATCH --job-name=accuracy-test
+#SBATCH --mail-user=st188776@stud.uni-stuttgart.de
+#SBATCH --mail-type=END,FAIL
+
+# Load Python environment
+source ~/Cod/.venv/bin/activate
+
+echo "Job running on host: $HOSTNAME"
+echo "Scratch directory: $SCRATCH_DIR"
+echo "Starting at: $(date)"
+
+# Copy dataset to scratch
+mkdir -p "$SCRATCH_DIR"
+cp ~/Cod/Maia_dataset/maia-chess-testing-set.csv "$SCRATCH_DIR"/
+
+# Run Python script
+cd "$SCRATCH_DIR"
+python ~/Cod/Accuracy_test/accuracy_test.py
+
+# Move output CSV to ~/Cod/
+if [ -f ~/Cod/Accuracy_test/accuracy_table.csv ]; then
+    mv ~/Cod/Accuracy_test/accuracy_table.csv ~/Cod/
+elif [ -f "$SCRATCH_DIR/accuracy_table.csv" ]; then
+    mv "$SCRATCH_DIR/accuracy_table.csv" ~/Cod/
+fi
+
+echo "Finished at: $(date)"
