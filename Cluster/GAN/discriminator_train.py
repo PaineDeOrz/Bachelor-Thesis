@@ -1,7 +1,17 @@
 """
 discriminator_train.py
-GPU-optimized WGAN discriminator pretraining with AMP + early stopping.
-Stops automatically at 80% training accuracy.
+
+GPU-optimized discriminator pretraining script for the Maia2 GAN setup.
+
+Assumptions:
+- `config.yaml` exists and can be parsed by `parse_args`.
+- `dataset/discriminator_dataset.csv` exists and has the columns expected by
+  `DiscriminatorDataset`.
+- The `checkpoints/` directory can be created in the current working directory.
+- Weights & Biases is available and the user has logged in or configured it.
+- A CUDA-capable GPU may be available; if not, the script falls back to CPU.
+- The script is intended to be run as a standalone training job.
+- Early stopping is based on reaching `TARGET_ACCURACY`.
 """
 
 import torch
@@ -19,17 +29,28 @@ from discriminator_dataset import DiscriminatorDataset
 from discriminator_model import Discriminator
 from utils import parse_args, get_all_possible_moves, create_elo_dict, readable_time
 
+
 # =============================================================================
 # CONFIG
 # =============================================================================
 
+# Stop training once the discriminator reaches this training accuracy.
 TARGET_ACCURACY = 0.80  # Early stop threshold
 
 
 def setup_device(cfg):
+    """
+    Select the runtime device and update the config accordingly.
+
+    Returns
+    -------
+    torch.device
+        CUDA if available, otherwise CPU.
+    """
     if torch.cuda.is_available():
         device = torch.device("cuda")
         cfg.device = "cuda"
+        # Enable cuDNN benchmark mode for potentially faster convolutions.
         torch.backends.cudnn.benchmark = True
     else:
         device = torch.device("cpu")
@@ -38,6 +59,9 @@ def setup_device(cfg):
 
 
 def log_device_info(device):
+    """
+    Print a short summary of the active compute device.
+    """
     print("=" * 80)
     print("DEVICE INFO")
     print("=" * 80)
@@ -57,6 +81,12 @@ def log_device_info(device):
 # =============================================================================
 
 def create_dataloader(cfg, csv_file):
+    """
+    Build the training dataloader and the move vocabulary size.
+
+    The move dictionary is built from the full move list so that move indices
+    are consistent with the dataset and model embedding table.
+    """
     print("\nLoading dataset...")
 
     all_moves = get_all_possible_moves()
@@ -71,6 +101,7 @@ def create_dataloader(cfg, csv_file):
         max_samples=cfg.max_samples_d
     )
 
+    # Use multiple workers only when running on GPU to avoid unnecessary overhead on CPU.
     loader = DataLoader(
         dataset,
         batch_size=cfg.batch_size_d,
@@ -91,6 +122,12 @@ def create_dataloader(cfg, csv_file):
 # =============================================================================
 
 def train_epoch(model, loader, optimizer, scheduler, scaler, device, epoch, cfg):
+    """
+    Run one training epoch for the discriminator.
+
+    This uses automatic mixed precision when running on CUDA, gradient scaling
+    for stable AMP training, gradient clipping, and periodic logging to W&B.
+    """
     model.train()
 
     total_loss = 0
@@ -100,7 +137,6 @@ def train_epoch(model, loader, optimizer, scheduler, scaler, device, epoch, cfg)
     start_time = time.time()
 
     for batch_idx, (boards, moves, labels) in enumerate(loader):
-
         boards = boards.to(device, non_blocking=True)
         moves = moves.to(device, non_blocking=True)
         labels = labels.to(device, non_blocking=True)
@@ -110,6 +146,7 @@ def train_epoch(model, loader, optimizer, scheduler, scaler, device, epoch, cfg)
         with autocast(enabled=(device.type == "cuda")):
             logits = model(boards, moves)
 
+            # Use a margin target instead of hard 0/1 targets for stable regression-style training.
             targets = torch.where(
                 labels == 1.0,
                 torch.full_like(logits, 0.9),
@@ -121,6 +158,7 @@ def train_epoch(model, loader, optimizer, scheduler, scaler, device, epoch, cfg)
         scaler.scale(loss).backward()
         scaler.unscale_(optimizer)
 
+        # Clip gradients to avoid unstable updates.
         grad_norm = torch.nn.utils.clip_grad_norm_(
             model.parameters(), cfg.grad_clip_d
         )
@@ -182,12 +220,18 @@ def train_epoch(model, loader, optimizer, scheduler, scaler, device, epoch, cfg)
 # =============================================================================
 
 def main():
+    """
+    Main training entry point.
+
+    Loads configuration, initializes the device and logging, builds the
+    dataset and model, then runs training with checkpointing and early stopping.
+    """
     print("Maia2 Discriminator Training (GPU Optimized)")
     print("=" * 80)
 
     cfg = parse_args("config.yaml")
 
-    # Override discriminator defaults
+    # Override discriminator defaults if they are not already set in the config.
     cfg.lr_d = getattr(cfg, "lr_d", 3e-4)
     cfg.weight_decay_d = getattr(cfg, "weight_decay_d", 1e-5)
     cfg.batch_size_d = getattr(cfg, "batch_size_d", 256)

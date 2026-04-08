@@ -1,3 +1,24 @@
+"""
+training_entrypoint.py
+
+Main training entrypoint for MAIA2 and optional discriminator-assisted training.
+
+This script:
+- parses a config file,
+- initializes the generator and optional discriminator,
+- restores training from checkpoints if requested,
+- preprocesses PGN chunks in worker processes,
+- trains on each chunk,
+- periodically saves checkpoints,
+- and supports both standard adversarial and WGAN-style adversarial training.
+
+Assumptions:
+- The YAML config file contains the fields referenced as `cfg.*`.
+- Monthly PGN files and optional `.zst` compressed inputs exist at the configured paths.
+- Helper functions imported from `utils` and `main` are available and compatible.
+- CUDA is expected for the current workflow, since the models are moved to `.cuda()`.
+"""
+
 import argparse
 import os
 import glob
@@ -38,13 +59,20 @@ from discriminator_model import Discriminator
 
 def parse_ckpt_name(path):
     """
-    Parse checkpoint filenames like:
-    lichess_db_standard_rated_2022-04_e1_f4_c195_20260218-205333.pt
+    Parse a checkpoint filename to recover resume metadata.
 
-    Returns (epoch_idx, file_idx, chunk_idx) where:
-    - epoch_idx: 0-based (e1 -> 0)
-    - file_idx: 1-based (f4 -> 4)
-    - chunk_idx: 0-based (c195 -> 195)
+    Expected filename pattern:
+    ..._e<EPOCH>_f<FILE>_c<CHUNK>_...
+
+    Returns
+    -------
+    tuple
+        (epoch_idx, file_idx, chunk_idx) where:
+        - epoch_idx is 0-based
+        - file_idx is 1-based
+        - chunk_idx is 0-based
+
+    If the filename does not match the expected pattern, returns (None, None, None).
     """
     base = os.path.basename(path)
     base = re.sub(r"\.pt$", "", base)
@@ -59,6 +87,20 @@ def parse_ckpt_name(path):
 # ============================================================
 
 def run(cfg):
+    """
+    Run the full training pipeline.
+
+    This function handles:
+    - printing the configuration,
+    - setting the random seed,
+    - preparing model and optimizer state,
+    - optionally loading checkpoints,
+    - wrapping models in DataParallel,
+    - iterating over epochs, files, and chunks,
+    - preprocessing data on worker processes,
+    - training the generator/discriminator,
+    - and saving checkpoints periodically.
+    """
 
     # --------------------------------------------------------
     # CONFIG PRINT
@@ -111,7 +153,7 @@ def run(cfg):
         print(">> Adversarial training enabled")
         discriminator_plain = Discriminator(cfg, len(all_moves)).cuda()
 
-        # ---- Optional discriminator pretrain load
+        # Optional discriminator pretraining load.
         if getattr(cfg, "pretrain_discriminator", False) and hasattr(cfg, "discriminator_path"):
             if os.path.exists(cfg.discriminator_path):
                 print(f"Loading pretrained discriminator: {cfg.discriminator_path}")
@@ -119,7 +161,7 @@ def run(cfg):
                 if "discriminator_state_dict" in disc_ckpt:
                     state_dict = disc_ckpt["discriminator_state_dict"]
                 else:
-                    state_dict = disc_ckpt                
+                    state_dict = disc_ckpt
                 if list(state_dict.keys())[0].startswith("module."):
                     state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
                 try:
@@ -150,7 +192,7 @@ def run(cfg):
     if cfg.from_checkpoint:
         checkpoints = glob.glob(f"{save_root}*.pt")
         if checkpoints:
-            # Use specific checkpoint if provided, otherwise latest by mtime
+            # Use specific checkpoint if provided, otherwise latest by mtime.
             if hasattr(cfg, "checkpoint_name") and cfg.checkpoint_name:
                 latest_ckpt = os.path.join(save_root, cfg.checkpoint_name)
                 if not os.path.exists(latest_ckpt):
@@ -180,11 +222,11 @@ def run(cfg):
             accumulated_games = checkpoint.get("accumulated_games", 0)
             print(f"Resuming from {readable_num(accumulated_samples)} samples")
 
-            # Parse resume position from filename
+            # Parse resume position from filename.
             parsed_epoch, parsed_file_idx, parsed_chunk_idx = parse_ckpt_name(latest_ckpt)
             if parsed_file_idx is not None:
                 resume_epoch = parsed_epoch
-                current_file_idx = parsed_file_idx - 1  # 0-based
+                current_file_idx = parsed_file_idx - 1  # convert to 0-based index
                 current_chunk_offset = parsed_chunk_idx + 1
                 print(
                     f"Resume position: epoch={resume_epoch}, "
@@ -192,7 +234,7 @@ def run(cfg):
                     f"next_chunk={current_chunk_offset}"
                 )
 
-    # DataParallel AFTER loading (preserves loaded state dicts)
+    # DataParallel AFTER loading so loaded state dicts remain compatible.
     model = nn.DataParallel(model)
     if cfg.use_adversarial:
         discriminator = nn.DataParallel(discriminator_plain)
@@ -222,14 +264,12 @@ def run(cfg):
         for file_idx, pgn_path in enumerate(pgn_paths):
             file_start = time.time()
 
-            # -------------------------------
-            # RESUME LOGIC: Skip completed files
-            # -------------------------------
+            # Skip files already completed in a resumed run.
             if file_idx < current_file_idx:
                 print(f"Skipping completed file {file_idx} ({pgn_path})")
                 continue
 
-            # Always decompress first
+            # Decompress the monthly PGN before processing.
             decompress_zst(pgn_path + ".zst", pgn_path)
             print(f"Decompress: {readable_time(time.time() - file_start)}")
 
@@ -242,11 +282,11 @@ def run(cfg):
                     pass
                 continue
 
-            # Skip chunks within resume file
+            # Skip chunks in the file if resuming mid-file.
             if file_idx == current_file_idx and current_chunk_offset > 0:
                 print(f"Resuming file {file_idx}: skipping first {current_chunk_offset} chunks")
                 pgn_chunks = pgn_chunks[current_chunk_offset:]
-                current_chunk_offset = 0  # Only skip once
+                current_chunk_offset = 0  # only skip once
 
             print(f"Training {pgn_path} ({len(pgn_chunks)} chunks)")
 
@@ -259,7 +299,6 @@ def run(cfg):
             # CHUNK TRAINING LOOP
             # -------------------------------
             for chunk_idx, chunk in enumerate(pgn_chunks):
-
                 queue = Queue(maxsize=1)
                 worker = Process(
                     target=preprocess_thread,
@@ -276,7 +315,7 @@ def run(cfg):
 
                     global_chunk_idx = next_chunk_index
 
-                    # TRAINING CALL
+                    # Train on the preprocessed chunk.
                     if cfg.use_adversarial:
                         if getattr(cfg, "use_wgan_stgan", False):
                             losses = train_chunks_wgan_adversarial(
@@ -290,7 +329,7 @@ def run(cfg):
                                 f"Side:{loss_side:.3f} D:{loss_d:.3f} Style:{loss_adv:.3f}"
                             )
                         else:
-                            # Note: train_chunks_adversarial must be imported/defined
+                            # This branch expects an adversarial training function with a matching signature.
                             losses = train_chunks_adversarial(
                                 cfg, data_train, model, discriminator, opt_g, opt_d,
                                 all_moves_dict, criterion_maia, criterion_side_info,
@@ -310,7 +349,7 @@ def run(cfg):
                         loss, loss_maia, loss_side, loss_value = losses
                         print(f"[{next_chunk_index}/{len(pgn_chunks)}] Loss:{loss:.3f} MAIA:{loss_maia:.3f}")
 
-                    # Accumulate stats
+                    # Update counters after successful chunk processing.
                     next_chunk_index += chunk_count
                     chunks_since_last_save += chunk_count
                     accumulated_samples += len(data_train)
@@ -318,7 +357,7 @@ def run(cfg):
 
                     print(f"Total: {readable_num(accumulated_samples)} pos, {readable_num(accumulated_games)} games")
 
-                    # CHECKPOINT
+                    # Save checkpoints periodically.
                     if chunks_since_last_save >= save_interval:
                         ckpt = {
                             "model_state_dict": model.module.state_dict(),

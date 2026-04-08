@@ -1,3 +1,27 @@
+"""
+maia2_data_and_model.py
+
+Utilities for:
+- parsing monthly PGN data in chunks,
+- filtering games by rating / result / event metadata,
+- extracting per-move training samples,
+- defining MAIA-style datasets,
+- defining the MAIA2 model architecture,
+- and providing training helpers for supervised and adversarial training.
+
+Assumptions:
+- The input PGN files exist in the expected monthly naming scheme:
+  `lichess_db_standard_rated_YYYY-MM.pgn`
+- `cfg` provides the configuration values used throughout the file
+  (e.g. `start_year`, `end_year`, `batch_size`, `dim_cnn`, `dim_vit`, etc.).
+- Helper functions imported from `utils` exist and behave as expected:
+  `map_to_category`, `board_to_tensor`, `mirror_move`, `extract_clock_time`,
+  `get_side_info`, etc.
+- The code is intended to run in a GPU-friendly training environment.
+- The `data_loader_from_data` helper below wraps already-preprocessed chunk
+  data into a PyTorch DataLoader for training.
+"""
+
 import chess.pgn
 import chess
 import pdb
@@ -15,6 +39,29 @@ from einops import rearrange
 
 
 def process_chunks(cfg, pgn_path, pgn_chunks, elo_dict):
+    """
+    Process one PGN file in chunks, optionally in parallel.
+
+    Parameters
+    ----------
+    cfg : object
+        Configuration object controlling filtering and processing behavior.
+    pgn_path : str
+        Path to the PGN file.
+    pgn_chunks : list[tuple[int, int]]
+        List of byte offsets defining chunk boundaries.
+    elo_dict : dict
+        Mapping used by `map_to_category` for Elo binning.
+
+    Returns
+    -------
+    ret : list
+        Flattened list of processed move samples.
+    count : int
+        Total number of accepted games.
+    len(pgn_chunks) : int
+        Number of chunks processed.
+    """
     if cfg.verbose:
         results = process_map(
             process_per_chunk,
@@ -29,6 +76,7 @@ def process_chunks(cfg, pgn_path, pgn_chunks, elo_dict):
                 [(start, end, pgn_path, elo_dict, cfg) for start, end in pgn_chunks]
             )
 
+    # Merge chunk outputs and collect per-chunk frequencies.
     ret = []
     count = 0
     list_of_dicts = []
@@ -37,6 +85,7 @@ def process_chunks(cfg, pgn_path, pgn_chunks, elo_dict):
         count += game_count
         list_of_dicts.append(frequency)
 
+    # Aggregate the frequency dictionaries from each chunk.
     total_counts = {}
     for d in list_of_dicts:
         for key, value in d.items():
@@ -47,6 +96,15 @@ def process_chunks(cfg, pgn_path, pgn_chunks, elo_dict):
 
 
 def process_per_game(game, white_elo, black_elo, white_win, cfg):
+    """
+    Extract training samples from a single PGN game.
+
+    For each move after the initial opening section, this function stores:
+    - a board representation,
+    - the move in UCI format,
+    - Elo metadata,
+    - and a win/loss signal from the active player's perspective.
+    """
     ret = []
     board = game.board()
     moves = list(game.mainline_moves())
@@ -58,6 +116,7 @@ def process_per_game(game, white_elo, black_elo, white_win, cfg):
             comment = node.comment
             clock_info = extract_clock_time(comment)
 
+            # Alternate perspective so the model sees positions from the side to move.
             if i % 2 == 0:
                 board_input = board.fen()
                 move_input = move.uci()
@@ -71,6 +130,7 @@ def process_per_game(game, white_elo, black_elo, white_win, cfg):
                 elo_oppo = white_elo
                 active_win = -white_win
 
+            # Keep only moves where the clock information is missing or acceptable.
             if clock_info is None or clock_info > cfg.clock_threshold:
                 ret.append((board_input, move_input, elo_self, elo_oppo, active_win))
 
@@ -82,21 +142,33 @@ def process_per_game(game, white_elo, black_elo, white_win, cfg):
 
 
 def game_filter(game):
+    """
+    Apply basic metadata-based filters to a PGN game.
+
+    Returns
+    -------
+    tuple or None
+        (game, white_elo, black_elo, white_win) if the game is accepted,
+        otherwise None.
+    """
     white_elo = game.headers.get("WhiteElo", "?")
     black_elo = game.headers.get("BlackElo", "?")
     time_control = game.headers.get("TimeControl", "?")
     result = game.headers.get("Result", "?")
     event = game.headers.get("Event", "?")
 
+    # Skip games with missing metadata.
     if white_elo == "?" or black_elo == "?" or time_control == "?" or result == "?" or event == "?":
         return
 
+    # Keep only rated games.
     if 'Rated' not in event:
         return
 
     white_elo = int(white_elo)
     black_elo = int(black_elo)
 
+    # Convert the PGN result into a sign from White's perspective.
     if result == '1-0':
         white_win = 1
     elif result == '0-1':
@@ -110,6 +182,11 @@ def game_filter(game):
 
 
 def process_per_chunk(args):
+    """
+    Process a single PGN chunk by reading games between byte offsets.
+
+    The chunk is filtered, Elo-binned, and converted into per-move samples.
+    """
     start_pos, end_pos, pgn_path, elo_dict, cfg = args
     ret = []
     game_count = 0
@@ -128,6 +205,7 @@ def process_per_chunk(args):
                 white_elo = map_to_category(white_elo, elo_dict)
                 black_elo = map_to_category(black_elo, elo_dict)
 
+                # Count games per Elo pairing so the dataset stays balanced.
                 if white_elo < black_elo:
                     range_1, range_2 = black_elo, white_elo
                 else:
@@ -148,6 +226,17 @@ def process_per_chunk(args):
 
 
 class MAIA1Dataset(torch.utils.data.Dataset):
+    """
+    Dataset for MAIA1-style training.
+
+    Each item returns:
+    - board tensor,
+    - move index,
+    - side-to-move Elo category,
+    - opponent Elo category,
+    - legal-move information,
+    - side information.
+    """
     def __init__(self, data, all_moves_dict, elo_dict, cfg):
         self.all_moves_dict = all_moves_dict
         self.cfg = cfg
@@ -178,6 +267,18 @@ class MAIA1Dataset(torch.utils.data.Dataset):
 
 
 class MAIA2Dataset(torch.utils.data.Dataset):
+    """
+    Dataset for MAIA2-style training.
+
+    Each item returns:
+    - board tensor,
+    - move index,
+    - self Elo category,
+    - opponent Elo category,
+    - legal-move information,
+    - side information,
+    - win signal.
+    """
     def __init__(self, data, all_moves_dict, cfg):
         self.all_moves_dict = all_moves_dict
         self.data = data
@@ -196,6 +297,12 @@ class MAIA2Dataset(torch.utils.data.Dataset):
 
 
 class BasicBlock(torch.nn.Module):
+    """
+    Residual CNN block used in the chess feature extractor.
+
+    The block applies two convolutions with batch normalization and ReLU,
+    plus dropout between the convolutions.
+    """
     def __init__(self, in_planes, planes, stride=1):
         super(BasicBlock, self).__init__()
         mid_planes = planes
@@ -218,6 +325,12 @@ class BasicBlock(torch.nn.Module):
 
 
 class ChessResNet(torch.nn.Module):
+    """
+    CNN backbone used to process the board before the transformer.
+
+    The network projects the board through several residual blocks and then
+    into a final feature map with `cfg.vit_length` channels.
+    """
     def __init__(self, block, cfg):
         super(ChessResNet, self).__init__()
         self.conv1 = torch.nn.Conv2d(cfg.input_channels, cfg.dim_cnn, kernel_size=3, stride=1, padding=1, bias=False)
@@ -227,6 +340,9 @@ class ChessResNet(torch.nn.Module):
         self.bn_last = torch.nn.BatchNorm2d(cfg.vit_length)
 
     def _make_layer(self, block, planes, num_blocks, stride=1):
+        """
+        Build a stack of residual blocks.
+        """
         layers = []
         for _ in range(num_blocks):
             layers.append(block(planes, planes, stride))
@@ -241,6 +357,9 @@ class ChessResNet(torch.nn.Module):
 
 
 class FeedForward(nn.Module):
+    """
+    Transformer-style feed-forward block with normalization and dropout.
+    """
     def __init__(self, dim, hidden_dim, dropout=0.):
         super().__init__()
         self.net = nn.Sequential(
@@ -257,6 +376,12 @@ class FeedForward(nn.Module):
 
 
 class EloAwareAttention(nn.Module):
+    """
+    Multi-head self-attention with an Elo-dependent query bias.
+
+    The Elo embedding is projected and added to the query branch so that the
+    attention pattern can depend on the players' rating context.
+    """
     def __init__(self, dim, heads=8, dim_head=64, dropout=0., elo_dim=64):
         super().__init__()
         inner_dim = dim_head * heads
@@ -285,6 +410,9 @@ class EloAwareAttention(nn.Module):
 
 
 class Transformer(nn.Module):
+    """
+    Stack of Elo-aware attention blocks and feed-forward layers.
+    """
     def __init__(self, dim, depth, heads, dim_head, mlp_dim, dropout=0., elo_dim=64):
         super().__init__()
         self.norm = nn.LayerNorm(dim)
@@ -304,6 +432,12 @@ class Transformer(nn.Module):
 
 
 class MAIA2Model(torch.nn.Module):
+    """
+    MAIA2 chess model with three outputs:
+    - move logits,
+    - side information logits,
+    - value prediction.
+    """
     def __init__(self, output_dim, elo_dict, cfg):
         super(MAIA2Model, self).__init__()
         self.cfg = cfg
@@ -314,8 +448,15 @@ class MAIA2Model(torch.nn.Module):
             nn.Linear(8 * 8, cfg.dim_vit),
             nn.LayerNorm(cfg.dim_vit),
         )
-        self.transformer = Transformer(cfg.dim_vit, cfg.num_blocks_vit, heads, dim_head,
-                                       mlp_dim=cfg.dim_vit, dropout=0.1, elo_dim=cfg.elo_dim * 2)
+        self.transformer = Transformer(
+            cfg.dim_vit,
+            cfg.num_blocks_vit,
+            heads,
+            dim_head,
+            mlp_dim=cfg.dim_vit,
+            dropout=0.1,
+            elo_dim=cfg.elo_dim * 2
+        )
         self.pos_embedding = nn.Parameter(torch.randn(1, cfg.vit_length, cfg.dim_vit))
         self.fc_1 = nn.Linear(cfg.dim_vit, output_dim)
         self.fc_2 = nn.Linear(cfg.dim_vit, output_dim + 6 + 6 + 1 + 64 + 64)
@@ -348,6 +489,9 @@ class MAIA2Model(torch.nn.Module):
 
 
 def read_monthly_data_path(cfg):
+    """
+    Build the list of monthly PGN files to process from the config range.
+    """
     print('Training Data:', flush=True)
     pgn_paths = []
 
@@ -358,7 +502,7 @@ def read_monthly_data_path(cfg):
         for month in range(start_month, end_month + 1):
             formatted_month = f"{month:02d}"
             pgn_path = cfg.data_root + f"/lichess_db_standard_rated_{year}-{formatted_month}.pgn"
-            # skip 2019-12
+            # Skip 2019-12 because it is excluded from the intended training range.
             if year == 2019 and month == 12:
                 continue
             print(pgn_path, flush=True)
@@ -366,7 +510,11 @@ def read_monthly_data_path(cfg):
 
     return pgn_paths
 
+
 def train_chunks(cfg, data, model, opt_g, all_moves_dict, criterion_maia, criterion_side_info, criterion_value):
+    """
+    Supervised training loop over preprocessed chunk data.
+    """
     model.train()
     total_loss = 0
     total_maia = 0
@@ -400,8 +548,13 @@ def train_chunks(cfg, data, model, opt_g, all_moves_dict, criterion_maia, criter
 
     return total_loss/len(data), total_maia/len(data), total_side/len(data), total_value/len(data)
 
+
 def train_chunks_adversarial(cfg, data, model, discriminator, opt_g, opt_d, all_moves_dict,
                              criterion_maia, criterion_side_info, criterion_value, criterion_d):
+    """
+    Simple adversarial training loop using a discriminator updated on
+    real and generator-produced fake moves.
+    """
     model.train()
     discriminator.train()
 
@@ -421,13 +574,13 @@ def train_chunks_adversarial(cfg, data, model, discriminator, opt_g, opt_d, all_
         side_info = side_info.cuda()
         active_win = active_win.cuda()
 
-        # 1?? Update discriminator
+        # 1) Update discriminator
         opt_d.zero_grad()
         logits_real = discriminator(boards, moves)
         labels_real = torch.ones_like(logits_real)
         loss_d_real = criterion_d(logits_real, labels_real)
 
-        # fake moves from generator
+        # Generate fake moves without backprop through the generator.
         with torch.no_grad():
             logits_gen, _, _ = model(boards, elo_self, elo_oppo)
             fake_moves = logits_gen.argmax(dim=1)
@@ -440,11 +593,12 @@ def train_chunks_adversarial(cfg, data, model, discriminator, opt_g, opt_d, all_
         loss_d.backward()
         opt_d.step()
 
-        # 2?? Update generator
+        # 2) Update generator
         opt_g.zero_grad()
         logits_maia, logits_side, logits_value = model(boards, elo_self, elo_oppo)
 
-        # adversarial loss
+        # Adversarial loss encourages the generator to produce moves that the
+        # discriminator classifies as human-like.
         logits_for_adv = discriminator(boards, logits_maia.argmax(dim=1))
         adv_loss = criterion_d(logits_for_adv, torch.ones_like(logits_for_adv))
 
@@ -465,8 +619,16 @@ def train_chunks_adversarial(cfg, data, model, discriminator, opt_g, opt_d, all_
 
     return total_loss/len(data), total_maia/len(data), total_side/len(data), total_value/len(data), total_d/len(data), total_adv/len(data)
 
+
 def train_chunks_wgan_adversarial(cfg, data, model, discriminator, opt_g, opt_d, all_moves_dict,
                                   criterion_maia, criterion_side_info, criterion_value, global_chunk_idx=0):
+    """
+    WGAN-style adversarial training loop with:
+    - multiple discriminator steps per generator step,
+    - gradient clipping,
+    - optional weight clipping,
+    - differentiable move sampling via Gumbel-Softmax.
+    """
     model.train()
     discriminator.train()
 
@@ -484,19 +646,19 @@ def train_chunks_wgan_adversarial(cfg, data, model, discriminator, opt_g, opt_d,
 
         B = boards.size(0)
 
-        # --- SHAPE DEBUGS (first batch of each chunk) ---
+        # Shape checks are helpful when debugging dataset / model mismatches.
         if batch_idx == 0:
             print(f"[DEBUG] boards shape raw: {boards.shape}")
             print(f"[DEBUG] moves_gt shape raw: {moves_gt.shape}")
             print(f"[DEBUG] elo_self shape: {elo_self.shape}")
             print(f"[DEBUG] elo_oppo shape: {elo_oppo.shape}")
 
-        # Ensure boards is [B, C, 8, 8]
+        # Ensure boards is [B, C, 8, 8].
         if boards.dim() == 5 and boards.size(1) == 1:
             boards = boards.squeeze(1)
         assert boards.dim() == 4, f"boards dim should be 4, got {boards.dim()} with shape {boards.shape}"
 
-        # Ensure moves_gt is [B]
+        # Ensure move labels are flat [B].
         moves_gt = moves_gt.view(-1)
         assert moves_gt.shape[0] == B, f"moves_gt batch mismatch: {moves_gt.shape} vs B={B}"
 
@@ -506,18 +668,16 @@ def train_chunks_wgan_adversarial(cfg, data, model, discriminator, opt_g, opt_d,
         for d_step in range(d_steps):
             opt_d.zero_grad()
 
-            # --- Real moves ---
+            # Real moves.
             logits_real = discriminator(boards, moves_gt)
             loss_real = torch.mean(logits_real)
 
-            # --- Fake moves from generator ---
+            # Fake moves sampled from the generator.
             with torch.no_grad():
                 logits_maia_d, _, _ = model(boards, elo_self, elo_oppo)
-                # Top-k sampling, but guarantee flat [B]
-                probs = torch.softmax(logits_maia_d, dim=-1)          # [B, num_moves]
-                topk_probs, topk_moves = torch.topk(probs, k=3, dim=-1)  # [B, 3]
-                # Sample index in {0,1,2} per batch element
-                idx = torch.randint(0, 3, (B,), device=boards.device)    # [B]
+                probs = torch.softmax(logits_maia_d, dim=-1)              # [B, num_moves]
+                topk_probs, topk_moves = torch.topk(probs, k=3, dim=-1)   # [B, 3]
+                idx = torch.randint(0, 3, (B,), device=boards.device)     # [B]
                 fake_moves = topk_moves[torch.arange(B, device=boards.device), idx]  # [B]
 
             if batch_idx == 0 and d_step == 0:
@@ -525,7 +685,7 @@ def train_chunks_wgan_adversarial(cfg, data, model, discriminator, opt_g, opt_d,
                 print(f"[DEBUG] topk_moves shape: {topk_moves.shape}")
                 print(f"[DEBUG] fake_moves shape before view: {fake_moves.shape}")
 
-            fake_moves = fake_moves.view(-1)   # Force [B]
+            fake_moves = fake_moves.view(-1)  # Force [B]
             assert fake_moves.shape[0] == B, f"fake_moves batch mismatch: {fake_moves.shape} vs B={B}"
 
             logits_fake = discriminator(boards, fake_moves)
@@ -537,7 +697,7 @@ def train_chunks_wgan_adversarial(cfg, data, model, discriminator, opt_g, opt_d,
             torch.nn.utils.clip_grad_norm_(discriminator.parameters(), getattr(cfg, "disc_grad_clip", 0.25))
             opt_d.step()
 
-            # Weight clipping (WGAN)
+            # Optional WGAN weight clipping.
             if getattr(cfg, "weight_clip", 0.0) > 0:
                 for p in discriminator.parameters():
                     p.data.clamp_(-cfg.weight_clip, cfg.weight_clip)
@@ -554,21 +714,12 @@ def train_chunks_wgan_adversarial(cfg, data, model, discriminator, opt_g, opt_d,
         loss_side = criterion_side_info(logits_side, side_info) * getattr(cfg, "side_info_coefficient", 1.0)
         loss_value = criterion_value(logits_value, active_win.float()) * getattr(cfg, "value_coefficient", 1.0)
 
-        #fake_moves_g = logits_maia.argmax(dim=-1)  # [B]
-        #if batch_idx == 0:
-        #    print(f"[DEBUG] logits_maia shape: {logits_maia.shape}")
-        #    print(f"[DEBUG] fake_moves_g shape: {fake_moves_g.shape}")
-        #logits_adv = discriminator(boards, fake_moves_g)
-        #loss_adv = -torch.mean(logits_adv)
-
-        # ----------------------------------------------------
-        # Differentiable move sampling via Gumbel-Softmax
-        # ----------------------------------------------------
+        # Differentiable move sampling through Gumbel-Softmax.
         tau = getattr(cfg, "gumbel_tau", 1.0)
         gumbel_moves = F.gumbel_softmax(
             logits_maia,
             tau=tau,
-            hard=True,      # Straight-through estimator
+            hard=True,
             dim=-1
         )  # [B, num_moves]
         if batch_idx == 0:
@@ -608,7 +759,12 @@ def train_chunks_wgan_adversarial(cfg, data, model, discriminator, opt_g, opt_d,
     )
     return avg_g, avg_maia, avg_side, avg_value, avg_d, avg_adv
 
+
 def preprocess_thread(queue, cfg, pgn_path, pgn_chunks_sublist, elo_dict):
+    """
+    Worker wrapper that preprocesses a subset of chunks and pushes results
+    into a multiprocessing queue.
+    """
     try:
         data, game_count, chunk_count = process_chunks(cfg, pgn_path, pgn_chunks_sublist, elo_dict)
         queue.put((data, game_count, chunk_count))
@@ -618,8 +774,14 @@ def preprocess_thread(queue, cfg, pgn_path, pgn_chunks_sublist, elo_dict):
         queue.put(([], 0, 0))
         raise e
 
+
 def data_loader_from_data(data, all_moves_dict, cfg):
-    """Wrap raw chunk data in a DataLoader for training"""
+    """
+    Wrap preprocessed raw data in a DataLoader for training.
+
+    This uses MAIA2Dataset so the training loop can iterate over boards, moves,
+    Elo categories, side info, and value labels.
+    """
     dataset = MAIA2Dataset(data, all_moves_dict, cfg)
     loader = torch.utils.data.DataLoader(
         dataset,
