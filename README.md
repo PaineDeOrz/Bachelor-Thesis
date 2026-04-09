@@ -59,4 +59,4 @@ The thesis implementation builds on the Maia2 codebase and uses the following to
 └── Thesis_Latex/
     └── the full Latex project (includes all pictures and tables in the thesis)
 ├── Cluster/
-    └── full codebase for all the results, instructions included in Instructions.md
+    └── full codebase for all the results, instructions included in README.md
